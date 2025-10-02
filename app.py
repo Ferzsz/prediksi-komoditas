@@ -228,23 +228,6 @@ df_results, y_true, y_pred = evaluate_model(model, X_test, y_test, scalers, komo
 
 st.markdown(f'<div class="success-card">✅ <b>Sistem siap!</b> {len(komoditas_list)} komoditas | {len(df_transposed)} data | Akurasi: {df_results["MAPE (%)"].mean():.2f}%</div>', unsafe_allow_html=True)
 
-# ================================================================================
-# HEADER
-# ================================================================================
-
-st.markdown("""
-<div style='text-align:center; margin-top: 10px; margin-bottom: 20px'>
-    <span style='font-size:2.9rem;font-weight: bold; letter-spacing:1px; color:#1E88E5;'>
-        Prediksi Harga Komoditas Pangan Indonesia
-    </span><br>
-    <span style='font-size:1.35rem; color:#303030;'>
-        Sistem Forecasting Time Series dengan Bidirectional LSTM Neural Network
-    </span><br>
-    <span style='font-size:0.98rem;color:#25865b;'>
-        Sistem siap digunakan!
-    </span>
-</div>
-""", unsafe_allow_html=True)
 
 # ================================================================================
 # SIDEBAR
