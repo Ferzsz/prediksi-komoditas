@@ -2,9 +2,7 @@
 ================================================================================
 APLIKASI PREDIKSI HARGA KOMODITAS PANGAN INDONESIA
 Bidirectional LSTM Time Series Forecasting System
-Version: 2.0 (Ultimate Edition)
-Author: Thesis Project
-Date: October 2025
+Version: 2.1 (Fixed & Enhanced)
 ================================================================================
 """
 
@@ -13,7 +11,6 @@ import pandas as pd
 import numpy as np
 import pickle
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from datetime import datetime, timedelta
 import warnings
@@ -31,13 +28,11 @@ st.set_page_config(
 )
 
 # ================================================================================
-# STYLING CSS
+# STYLING CSS (ENHANCED)
 # ================================================================================
 
 st.markdown("""
 <style>
-    .main-header{font-size:2.8rem;font-weight:bold;color:#1E88E5;text-align:center;padding:20px 0;text-shadow:2px 2px 4px rgba(0,0,0,0.1)}
-    .sub-header{font-size:1.2rem;color:#616161;text-align:center;margin-bottom:30px}
     .info-card{background:linear-gradient(135deg,#E3F2FD,#BBDEFB);padding:20px;border-radius:12px;border-left:6px solid #1E88E5;margin:15px 0;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
     .forecast-card{background:linear-gradient(135deg,#FFF3E0,#FFE0B2);padding:20px;border-radius:12px;border-left:6px solid #FF9800;margin:15px 0;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
     .insight-card{background:linear-gradient(135deg,#F3E5F5,#E1BEE7);padding:20px;border-radius:12px;border-left:6px solid #9C27B0;margin:15px 0;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
@@ -46,27 +41,10 @@ st.markdown("""
     .success-card{background:linear-gradient(135deg,#E8F5E9,#C8E6C9);padding:15px;border-radius:10px;border-left:5px solid #4CAF50;margin:10px 0}
     .warning-card{background:linear-gradient(135deg,#FFF9C4,#FFF59D);padding:15px;border-radius:10px;border-left:5px solid #FFC107;margin:10px 0}
     .danger-card{background:linear-gradient(135deg,#FFEBEE,#FFCDD2);padding:15px;border-radius:10px;border-left:5px solid #F44336;margin:10px 0}
+    .stat-box{background:#f8f9fa;padding:15px;border-radius:8px;border:1px solid #dee2e6;margin:10px 0}
     div.stButton>button{width:100%;background:linear-gradient(135deg,#1E88E5,#1976D2);color:white;font-size:16px;font-weight:bold;border-radius:8px;padding:12px;border:none;box-shadow:0 4px 6px rgba(0,0,0,0.1);transition:all 0.3s}
     div.stButton>button:hover{background:linear-gradient(135deg,#1976D2,#1565C0);box-shadow:0 6px 12px rgba(0,0,0,0.15);transform:translateY(-2px)}
 </style>
-""", unsafe_allow_html=True)
-
-# ================================================================================
-# HEADER BAGIAN DEPAN (JUDUL)
-# ================================================================================
-
-st.markdown("""
-<div style='text-align:center; margin-top: 10px; margin-bottom: 20px'>
-    <span style='font-size:2.9rem;font-weight: bold; letter-spacing:1px; color:#1E88E5;'>
-        Prediksi Harga Komoditas Pangan Indonesia
-    </span><br>
-    <span style='font-size:1.35rem; color:#303030;'>
-        Sistem Forecasting Time Series dengan Bidirectional LSTM Neural Network
-    </span><br>
-    <span style='font-size:0.98rem;color:#25865b;'>
-        Sistem siap digunakan!
-    </span>
-</div>
 """, unsafe_allow_html=True)
 
 # ================================================================================
@@ -84,7 +62,7 @@ def load_model_and_scalers():
             komoditas_list = pickle.load(f)
         return model, scalers, komoditas_list
     except Exception as e:
-        st.error(f"❌ Error loading model: {str(e)}")
+        st.error(f"❌ Error loading: {str(e)}")
         return None, None, None
 
 @st.cache_data
@@ -120,10 +98,6 @@ def preprocess_data(df_raw, komoditas_list, scalers, time_steps=20):
     X, y = np.array(X), np.array(y)
     split_idx = int(len(X) * 0.85)
     return X[split_idx:], y[split_idx:], df_transposed, data_normalized
-
-# ================================================================================
-# FUNGSI EVALUASI DAN ALIGN
-# ================================================================================
 
 def evaluate_model(model, X_test, y_test, scalers, komoditas_list):
     y_pred_norm = model.predict(X_test, verbose=0)
@@ -163,44 +137,43 @@ def align_predictions(y_true, y_pred):
     
     return y_aligned
 
-# ================================================================================
-# FUNGSI FORECASTING DAN TREND ANALYSIS
-# ================================================================================
-
 def forecast_future(model, data_normalized, scalers, komoditas_list, n_steps, time_steps=20):
-    last_sequence = data_normalized[-time_steps:]
-    predictions = []
-    current_sequence = last_sequence.copy()
-    
-    for _ in range(n_steps):
-        pred_norm = model.predict(current_sequence.reshape(1, time_steps, -1), verbose=0)
-        predictions.append(pred_norm[0])
-        current_sequence = np.vstack([current_sequence[1:], pred_norm[0]])
-    
-    predictions = np.array(predictions)
-    predictions_denorm = np.zeros_like(predictions)
-    for i, kolom in enumerate(komoditas_list):
-        predictions_denorm[:, i] = scalers[kolom].inverse_transform(predictions[:, i].reshape(-1, 1)).flatten()
-    
-    return predictions_denorm
+    """Fixed forecast function"""
+    try:
+        last_sequence = data_normalized[-time_steps:].copy()
+        predictions = []
+        current_sequence = last_sequence.copy()
+        
+        for _ in range(n_steps):
+            input_data = current_sequence.reshape(1, time_steps, len(komoditas_list))
+            pred_norm = model.predict(input_data, verbose=0)
+            predictions.append(pred_norm[0])
+            current_sequence = np.vstack([current_sequence[1:], pred_norm[0]])
+        
+        predictions = np.array(predictions)
+        predictions_denorm = np.zeros_like(predictions)
+        
+        for i, kolom in enumerate(komoditas_list):
+            predictions_denorm[:, i] = scalers[kolom].inverse_transform(predictions[:, i].reshape(-1, 1)).flatten()
+        
+        return predictions_denorm
+    except Exception as e:
+        st.error(f"Error in forecasting: {str(e)}")
+        return None
 
 def analyze_trend(current_price, predicted_price):
     change_pct = (predicted_price - current_price) / current_price * 100
     
     if abs(change_pct) < 2:
-        return {"trend": "Stabil", "icon": "⚖️", "color": "#2196F3", "rec": "Harga stabil. Waktu tepat untuk pembelian rutin."}
+        return {"trend": "Stabil", "icon": "⚖️", "color": "#2196F3", "rec": "Harga relatif stabil. Waktu yang tepat untuk pembelian rutin sesuai kebutuhan."}
     elif 2 <= change_pct < 5:
-        return {"trend": "Naik Ringan", "icon": "📈", "color": "#FF9800", "rec": "Harga naik ringan. Pertimbangkan beli sebelum naik lebih lanjut."}
+        return {"trend": "Naik Ringan", "icon": "📈", "color": "#FF9800", "rec": "Harga cenderung naik ringan. Pertimbangkan untuk membeli sebelum kenaikan lebih lanjut."}
     elif change_pct >= 5:
-        return {"trend": "Naik Signifikan", "icon": "🚀", "color": "#F44336", "rec": "Kenaikan signifikan. Beli segera atau cari alternatif."}
+        return {"trend": "Naik Signifikan", "icon": "🚀", "color": "#F44336", "rec": "Kenaikan harga signifikan diprediksi. Lakukan pembelian segera atau cari komoditas alternatif."}
     elif -5 < change_pct <= -2:
-        return {"trend": "Turun Ringan", "icon": "📉", "color": "#4CAF50", "rec": "Harga turun ringan. Tunggu untuk harga lebih baik."}
+        return {"trend": "Turun Ringan", "icon": "📉", "color": "#4CAF50", "rec": "Harga cenderung turun ringan. Dapat menunggu untuk mendapatkan harga yang lebih baik."}
     else:
-        return {"trend": "Turun Signifikan", "icon": "⬇️", "color": "#00C853", "rec": "Penurunan signifikan. Waktu optimal untuk pembelian besar."}
-
-# ================================================================================
-# UI HELPER
-# ================================================================================
+        return {"trend": "Turun Signifikan", "icon": "⬇️", "color": "#00C853", "rec": "Penurunan harga signifikan. Waktu optimal untuk melakukan pembelian dalam jumlah besar."}
 
 def metric_card(title, value, subtitle, color="#1E88E5"):
     return f'<div class="metric-card"><h3 style="color:{color};margin:0">{title}</h3><p style="font-size:2rem;font-weight:bold;color:{color};margin:10px 0">{value}</p><p style="font-size:0.9rem;color:#757575;margin:0">{subtitle}</p></div>'
@@ -226,8 +199,22 @@ if model is None or df_raw is None:
 X_test, y_test, df_transposed, data_normalized = preprocess_data(df_raw, komoditas_list, scalers)
 df_results, y_true, y_pred = evaluate_model(model, X_test, y_test, scalers, komoditas_list)
 
-st.markdown(f'<div class="success-card">✅ <b>Sistem siap!</b> {len(komoditas_list)} komoditas | {len(df_transposed)} data | Akurasi: {df_results["MAPE (%)"].mean():.2f}%</div>', unsafe_allow_html=True)
+# ================================================================================
+# HEADER
+# ================================================================================
 
+st.markdown("""
+<div style='text-align:center; margin-top: 10px; margin-bottom: 20px'>
+    <span style='font-size:2.9rem;font-weight: bold; letter-spacing:1px; color:#1E88E5;'>
+        Prediksi Harga Komoditas Pangan Indonesia
+    </span><br>
+    <span style='font-size:1.35rem; color:#303030;'>
+        Sistem Forecasting Time Series dengan Bidirectional LSTM Neural Network
+    </span>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown(f'<div class="success-card">✅ <b>Sistem siap digunakan!</b> {len(komoditas_list)} komoditas | {len(df_transposed)} data | Akurasi: {df_results["MAPE (%)"].mean():.2f}%</div>', unsafe_allow_html=True)
 
 # ================================================================================
 # SIDEBAR
@@ -365,12 +352,12 @@ with tab1:
             st.plotly_chart(fig_comp, use_container_width=True)
 
 # ================================================================================
-# TAB 2: PREDIKSI FUTURE
+# TAB 2: PREDIKSI FUTURE (ENHANCED WITH MORE CARDS)
 # ================================================================================
 
 with tab2:
     st.markdown("### 🔮 Prediksi Harga Future")
-    st.markdown('<div class="forecast-card"><h4 style="margin-top:0">💡 Panduan</h4><ol style="margin-bottom:0"><li>Pilih periode (tahun & bulan)</li><li>Pilih komoditas</li><li>Klik "🚀 Mulai Prediksi"</li><li>Analisis trend & rekomendasi</li></ol></div>', unsafe_allow_html=True)
+    st.markdown('<div class="forecast-card"><h4 style="margin-top:0">💡 Panduan Penggunaan</h4><ol style="margin-bottom:0"><li>Pilih <b>periode target</b> (tahun & bulan)</li><li>Pilih <b>komoditas</b> yang ingin diprediksi</li><li>Klik <b>"🚀 Mulai Prediksi"</b></li><li>Analisis hasil & rekomendasi sistem</li></ol></div>', unsafe_allow_html=True)
     
     st.markdown("---")
     st.markdown("#### 📅 Periode Prediksi")
@@ -398,23 +385,29 @@ with tab2:
         avg_3m = df_transposed[forecast_kom].tail(12).mean()
         mape_kom = df_results[df_results['Komoditas'] == forecast_kom]['MAPE (%)'].values[0]
         
+        # Info cards sebelum prediksi
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("💰 Harga Terakhir", f"Rp {current:,.0f}", f"{last_date.strftime('%d %b %Y')}")
+            st.markdown(f'<div class="stat-box"><h4 style="color:#2196F3;margin:0">💰 Harga Terakhir</h4><p style="font-size:1.8rem;font-weight:bold;margin:5px 0">Rp {current:,.0f}</p><p style="font-size:0.85rem;color:#757575;margin:0">{last_date.strftime("%d %b %Y")}</p></div>', unsafe_allow_html=True)
         with col2:
-            st.metric("📊 Avg 3 Bulan", f"Rp {avg_3m:,.0f}")
+            st.markdown(f'<div class="stat-box"><h4 style="color:#FF9800;margin:0">📊 Avg 3 Bulan</h4><p style="font-size:1.8rem;font-weight:bold;margin:5px 0">Rp {avg_3m:,.0f}</p><p style="font-size:0.85rem;color:#757575;margin:0">Rata-rata historical</p></div>', unsafe_allow_html=True)
         with col3:
-            st.metric("🎯 Akurasi", f"{mape_kom:.2f}%", "MAPE")
+            st.markdown(f'<div class="stat-box"><h4 style="color:#4CAF50;margin:0">🎯 Akurasi Model</h4><p style="font-size:1.8rem;font-weight:bold;margin:5px 0">{mape_kom:.2f}%</p><p style="font-size:0.85rem;color:#757575;margin:0">MAPE komoditas ini</p></div>', unsafe_allow_html=True)
         
         if st.button("🚀 Mulai Prediksi", type="primary", use_container_width=True):
             with st.spinner("🔮 Processing..."):
                 predictions = forecast_future(model, data_normalized, scalers, komoditas_list, weeks_ahead)
+                
+                if predictions is None:
+                    st.error("❌ Terjadi error saat prediksi. Silakan coba lagi.")
+                    st.stop()
+                
                 idx = komoditas_list.index(forecast_kom)
                 pred_price = predictions[-1, idx]
                 forecast_dates = [last_date + timedelta(weeks=i+1) for i in range(weeks_ahead)]
                 trend = analyze_trend(current, pred_price)
             
-            st.markdown('<div class="success-card">✅ <b>Prediksi selesai!</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="success-card">✅ <b>Prediksi berhasil!</b> Berikut hasil analisis lengkap</div>', unsafe_allow_html=True)
             
             st.markdown("---")
             st.markdown("### 📊 Hasil Prediksi")
@@ -429,14 +422,14 @@ with tab2:
                 st.markdown(f'<div class="metric-card" style="border-color:{trend["color"]}"><h3 style="color:{trend["color"]};margin:0">{trend["icon"]} Trend</h3><p style="font-size:2.2rem;font-weight:bold;color:{trend["color"]};margin:10px 0">{change_pct:+.2f}%</p><p style="font-size:0.9rem;color:#757575;margin:0">{trend["trend"]}</p></div>', unsafe_allow_html=True)
             
             st.markdown("---")
-            st.markdown("### 🎯 Analisis & Rekomendasi")
+            st.markdown("### 🎯 Analisis Lengkap")
             
             col1, col2 = st.columns(2)
             with col1:
-                st.markdown(f'<div class="insight-card"><h4 style="margin-top:0">📊 Analisis</h4><ul style="margin-bottom:0"><li><b>Selisih:</b> Rp {abs(pred_price-current):,.0f}</li><li><b>Persentase:</b> {change_pct:+.2f}%</li><li><b>Trend:</b> {trend["trend"]}</li><li><b>Periode:</b> {weeks_ahead} minggu</li><li><b>MAPE:</b> {mape_kom:.2f}%</li></ul></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="insight-card"><h4 style="margin-top:0">📊 Detail Perubahan Harga</h4><ul style="margin-bottom:0"><li><b>Selisih Nominal:</b> Rp {abs(pred_price-current):,.0f}</li><li><b>Persentase:</b> {change_pct:+.2f}%</li><li><b>Kategori Trend:</b> {trend["trend"]} {trend["icon"]}</li><li><b>Periode:</b> {weeks_ahead} minggu ({weeks_ahead/4:.1f} bulan)</li><li><b>Tingkat Kepercayaan:</b> MAPE {mape_kom:.2f}%</li></ul></div>', unsafe_allow_html=True)
             with col2:
                 card = "success-card" if change_pct < 0 else "warning-card" if abs(change_pct) < 5 else "danger-card"
-                st.markdown(f'<div class="{card}"><h4 style="margin-top:0">💡 Rekomendasi</h4><p style="margin-bottom:0"><b>{trend["rec"]}</b></p></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="{card}"><h4 style="margin-top:0">💡 Rekomendasi Strategis</h4><p style="margin-bottom:0;line-height:1.6"><b>{trend["rec"]}</b></p></div>', unsafe_allow_html=True)
             
             st.markdown("---")
             st.markdown("### 📈 Statistik Prediksi")
@@ -444,13 +437,13 @@ with tab2:
             pred_series = predictions[:, idx]
             col1, col2, col3, col4 = st.columns(4)
             with col1:
-                st.metric("Min", f"Rp {pred_series.min():,.0f}")
+                st.markdown(f'<div class="stat-box"><h4 style="color:#F44336;margin:0">📉 Min</h4><p style="font-size:1.5rem;font-weight:bold;margin:5px 0">Rp {pred_series.min():,.0f}</p><p style="font-size:0.8rem;color:#757575;margin:0">Terendah</p></div>', unsafe_allow_html=True)
             with col2:
-                st.metric("Max", f"Rp {pred_series.max():,.0f}")
+                st.markdown(f'<div class="stat-box"><h4 style="color:#4CAF50;margin:0">📈 Max</h4><p style="font-size:1.5rem;font-weight:bold;margin:5px 0">Rp {pred_series.max():,.0f}</p><p style="font-size:0.8rem;color:#757575;margin:0">Tertinggi</p></div>', unsafe_allow_html=True)
             with col3:
-                st.metric("Avg", f"Rp {pred_series.mean():,.0f}")
+                st.markdown(f'<div class="stat-box"><h4 style="color:#2196F3;margin:0">📊 Avg</h4><p style="font-size:1.5rem;font-weight:bold;margin:5px 0">Rp {pred_series.mean():,.0f}</p><p style="font-size:0.8rem;color:#757575;margin:0">Rata-rata</p></div>', unsafe_allow_html=True)
             with col4:
-                st.metric("Volatility", f"Rp {pred_series.std():,.0f}")
+                st.markdown(f'<div class="stat-box"><h4 style="color:#9C27B0;margin:0">📊 Volatility</h4><p style="font-size:1.5rem;font-weight:bold;margin:5px 0">Rp {pred_series.std():,.0f}</p><p style="font-size:0.8rem;color:#757575;margin:0">Std Dev</p></div>', unsafe_allow_html=True)
             
             st.markdown("---")
             st.markdown("### 📋 Detail Mingguan")
@@ -468,22 +461,22 @@ with tab2:
             naik = sum(1 for i in range(1, len(pred_series)) if pred_series[i] > pred_series[i-1])
             turun = sum(1 for i in range(1, len(pred_series)) if pred_series[i] < pred_series[i-1])
             
-            st.markdown(f'<div class="info-card"><h4 style="margin-top:0">📊 Ringkasan Trend:</h4><ul style="margin-bottom:0"><li>📈 <b>Naik:</b> {naik}/{weeks_ahead-1} minggu ({naik/(weeks_ahead-1)*100:.1f}%)</li><li>📉 <b>Turun:</b> {turun}/{weeks_ahead-1} minggu ({turun/(weeks_ahead-1)*100:.1f}%)</li><li>💡 <b>Kecenderungan:</b> {"Bullish" if naik > turun else "Bearish" if turun > naik else "Sideways"}</li></ul></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="info-card"><h4 style="margin-top:0">📊 Ringkasan Trend Mingguan:</h4><ul style="margin-bottom:0"><li>📈 <b>Minggu Naik:</b> {naik}/{weeks_ahead-1} ({naik/(weeks_ahead-1)*100:.1f}%)</li><li>📉 <b>Minggu Turun:</b> {turun}/{weeks_ahead-1} ({turun/(weeks_ahead-1)*100:.1f}%)</li><li>💡 <b>Kecenderungan:</b> {"Bullish (Naik)" if naik > turun else "Bearish (Turun)" if turun > naik else "Sideways (Stabil)"}</li></ul></div>', unsafe_allow_html=True)
             
             st.markdown("---")
             col1, col2 = st.columns(2)
             with col1:
                 st.download_button("📥 Download CSV", df_forecast.to_csv(index=False, encoding='utf-8-sig'), f"prediksi_{forecast_kom}_{target_date.strftime('%Y%m')}.csv", "text/csv", use_container_width=True)
             with col2:
-                summary = f"""LAPORAN PREDIKSI HARGA
-==================
+                summary = f"""LAPORAN PREDIKSI HARGA KOMODITAS
+================================
 Komoditas: {forecast_kom}
 Periode: {target_date.strftime('%B %Y')}
-Tanggal: {datetime.now().strftime('%d %b %Y %H:%M')}
+Tanggal: {datetime.now().strftime('%d %b %Y %H:%M WIB')}
 
 RINGKASAN:
 - Harga Saat Ini: Rp {current:,.0f}
-- Prediksi: Rp {pred_price:,.0f}
+- Harga Prediksi: Rp {pred_price:,.0f}
 - Perubahan: {change_pct:+.2f}%
 - Trend: {trend["trend"]}
 
@@ -491,6 +484,7 @@ STATISTIK:
 - Min: Rp {pred_series.min():,.0f}
 - Max: Rp {pred_series.max():,.0f}
 - Avg: Rp {pred_series.mean():,.0f}
+- Volatility: Rp {pred_series.std():,.0f}
 
 REKOMENDASI:
 {trend["rec"]}
@@ -505,8 +499,8 @@ AKURASI: MAPE {mape_kom:.2f}%
 
 st.markdown("""
 <div style="text-align:center;padding:20px;background:linear-gradient(135deg,#f5f5f5,#e0e0e0);border-radius:10px;margin-top:30px">
-    <h4 style="color:#1E88E5;margin:0;font-size:1.3rem">Sistem Prediksi Harga Komoditas Pangan Indonesia</h4>
-    <p style="color:#616161;margin:8px 0;font-size:1rem"><b>Powered by Bidirectional LSTM & Streamlit</b></p>
+    <h4 style="color:#1E88E5;margin:0">Sistem Prediksi Harga Komoditas Pangan Indonesia</h4>
+    <p style="color:#616161;margin:8px 0"><b>Powered by Bidirectional LSTM & Streamlit</b></p>
     <p style="color:#9E9E9E;font-size:0.9rem;margin:5px 0">01 Jan 2020 - 01 Jan 2025 | 31 Komoditas | Data Mingguan</p>
 </div>
 """, unsafe_allow_html=True)
