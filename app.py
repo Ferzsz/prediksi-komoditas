@@ -52,12 +52,29 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ================================================================================
+# HEADER BAGIAN DEPAN (JUDUL)
+# ================================================================================
+
+st.markdown("""
+<div style='text-align:center; margin-top: 10px; margin-bottom: 20px'>
+    <span style='font-size:2.9rem;font-weight: bold; letter-spacing:1px; color:#1E88E5;'>
+        Prediksi Harga Komoditas Pangan Indonesia
+    </span><br>
+    <span style='font-size:1.35rem; color:#303030;'>
+        Sistem Forecasting Time Series dengan Bidirectional LSTM Neural Network
+    </span><br>
+    <span style='font-size:0.98rem;color:#25865b;'>
+        Sistem siap digunakan!
+    </span>
+</div>
+""", unsafe_allow_html=True)
+
+# ================================================================================
 # FUNGSI LOADING & PREPROCESSING
 # ================================================================================
 
 @st.cache_resource
 def load_model_and_scalers():
-    """Load model, scalers, dan list komoditas"""
     try:
         from tensorflow.keras.models import load_model
         model = load_model('best_lstm_model.h5', compile=False)
@@ -67,12 +84,11 @@ def load_model_and_scalers():
             komoditas_list = pickle.load(f)
         return model, scalers, komoditas_list
     except Exception as e:
-        st.error(f"❌ Error loading: {str(e)}")
+        st.error(f"❌ Error loading model: {str(e)}")
         return None, None, None
 
 @st.cache_data
 def load_dataset():
-    """Load dataset dari Excel"""
     try:
         return pd.read_excel('dataset.xlsx')
     except Exception as e:
@@ -80,7 +96,6 @@ def load_dataset():
         return None
 
 def preprocess_data(df_raw, komoditas_list, scalers, time_steps=20):
-    """Preprocessing data untuk LSTM"""
     df_data = df_raw.iloc[:, 1:]
     df_transposed = df_data.T
     df_transposed.columns = komoditas_list
@@ -107,11 +122,10 @@ def preprocess_data(df_raw, komoditas_list, scalers, time_steps=20):
     return X[split_idx:], y[split_idx:], df_transposed, data_normalized
 
 # ================================================================================
-# FUNGSI EVALUASI MODEL
+# FUNGSI EVALUASI DAN ALIGN
 # ================================================================================
 
 def evaluate_model(model, X_test, y_test, scalers, komoditas_list):
-    """Evaluasi performa model"""
     y_pred_norm = model.predict(X_test, verbose=0)
     y_pred = np.zeros_like(y_pred_norm)
     y_true = np.zeros_like(y_test)
@@ -132,7 +146,6 @@ def evaluate_model(model, X_test, y_test, scalers, komoditas_list):
     return pd.DataFrame(results), y_true, y_pred
 
 def align_predictions(y_true, y_pred):
-    """Advanced alignment untuk visualisasi smooth"""
     y_aligned = np.zeros_like(y_pred)
     y_aligned[0] = y_true[0]
     alpha, trend_weight, momentum_weight = 0.25, 0.6, 0.4
@@ -151,11 +164,10 @@ def align_predictions(y_true, y_pred):
     return y_aligned
 
 # ================================================================================
-# FUNGSI FORECASTING
+# FUNGSI FORECASTING DAN TREND ANALYSIS
 # ================================================================================
 
 def forecast_future(model, data_normalized, scalers, komoditas_list, n_steps, time_steps=20):
-    """Prediksi harga untuk n_steps ke depan"""
     last_sequence = data_normalized[-time_steps:]
     predictions = []
     current_sequence = last_sequence.copy()
@@ -173,7 +185,6 @@ def forecast_future(model, data_normalized, scalers, komoditas_list, n_steps, ti
     return predictions_denorm
 
 def analyze_trend(current_price, predicted_price):
-    """Analisis trend dan rekomendasi"""
     change_pct = (predicted_price - current_price) / current_price * 100
     
     if abs(change_pct) < 2:
@@ -188,15 +199,13 @@ def analyze_trend(current_price, predicted_price):
         return {"trend": "Turun Signifikan", "icon": "⬇️", "color": "#00C853", "rec": "Penurunan signifikan. Waktu optimal untuk pembelian besar."}
 
 # ================================================================================
-# UI HELPER FUNCTIONS
+# UI HELPER
 # ================================================================================
 
 def metric_card(title, value, subtitle, color="#1E88E5"):
-    """Generate HTML metric card"""
     return f'<div class="metric-card"><h3 style="color:{color};margin:0">{title}</h3><p style="font-size:2rem;font-weight:bold;color:{color};margin:10px 0">{value}</p><p style="font-size:0.9rem;color:#757575;margin:0">{subtitle}</p></div>'
 
 def color_mape(val):
-    """Color coding MAPE cells"""
     if val < 5: return 'background-color:#A5D6A7;color:#1B5E20;font-weight:bold'
     elif val < 10: return 'background-color:#FFF59D;color:#F57F17;font-weight:bold'
     elif val < 20: return 'background-color:#FFCC80;color:#E65100;font-weight:bold'
@@ -223,8 +232,19 @@ st.markdown(f'<div class="success-card">✅ <b>Sistem siap!</b> {len(komoditas_l
 # HEADER
 # ================================================================================
 
-st.markdown('<p class="main-header">🌾 Prediksi Harga Komoditas Pangan Indonesia</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Sistem Forecasting Time Series dengan Bidirectional LSTM Neural Network</p>', unsafe_allow_html=True)
+st.markdown("""
+<div style='text-align:center; margin-top: 10px; margin-bottom: 20px'>
+    <span style='font-size:2.9rem;font-weight: bold; letter-spacing:1px; color:#1E88E5;'>
+        Prediksi Harga Komoditas Pangan Indonesia
+    </span><br>
+    <span style='font-size:1.35rem; color:#303030;'>
+        Sistem Forecasting Time Series dengan Bidirectional LSTM Neural Network
+    </span><br>
+    <span style='font-size:0.98rem;color:#25865b;'>
+        Sistem siap digunakan!
+    </span>
+</div>
+""", unsafe_allow_html=True)
 
 # ================================================================================
 # SIDEBAR
@@ -500,5 +520,10 @@ AKURASI: MAPE {mape_kom:.2f}%
 # FOOTER
 # ================================================================================
 
-st.markdown("---")
-st.markdown('<div style="text-align:center;padding:20px;background:linear-gradient(135deg,#f5f5f5,#e0e0e0);border-radius:10px"><h4 style="color:#1E88E5;margin:0">🌾 Sistem Prediksi Harga Komoditas Pangan Indonesia</h4><p style="color:#616161;margin:5px 0"><b>Bidirectional LSTM & Streamlit</b></p><p style="color:#9E9E9E;font-size:0.9rem;margin:5px 0">01 Jan 2020 - 01 Jan 2025 | 31 Komoditas | Data Mingguan</p></div>', unsafe_allow_html=True)
+st.markdown("""
+<div style="text-align:center;padding:20px;background:linear-gradient(135deg,#f5f5f5,#e0e0e0);border-radius:10px;margin-top:30px">
+    <h4 style="color:#1E88E5;margin:0;font-size:1.3rem">Sistem Prediksi Harga Komoditas Pangan Indonesia</h4>
+    <p style="color:#616161;margin:8px 0;font-size:1rem"><b>Powered by Bidirectional LSTM & Streamlit</b></p>
+    <p style="color:#9E9E9E;font-size:0.9rem;margin:5px 0">01 Jan 2020 - 01 Jan 2025 | 31 Komoditas | Data Mingguan</p>
+</div>
+""", unsafe_allow_html=True)
