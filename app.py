@@ -427,9 +427,6 @@ with tab2:
             col1, col2 = st.columns(2)
             with col1:
                 st.markdown(f'<div class="insight-card"><h4 style="margin-top:0">📊 Detail Perubahan Harga</h4><ul style="margin-bottom:0"><li><b>Selisih Nominal:</b> Rp {abs(pred_price-current):,.0f}</li><li><b>Persentase:</b> {change_pct:+.2f}%</li><li><b>Kategori Trend:</b> {trend["trend"]} {trend["icon"]}</li><li><b>Periode:</b> {weeks_ahead} minggu ({weeks_ahead/4:.1f} bulan)</li><li><b>Tingkat Kepercayaan:</b> MAPE {mape_kom:.2f}%</li></ul></div>', unsafe_allow_html=True)
-            with col2:
-                card = "success-card" if change_pct < 0 else "warning-card" if abs(change_pct) < 5 else "danger-card"
-                st.markdown(f'<div class="{card}"><h4 style="margin-top:0">💡 Rekomendasi Strategis</h4><p style="margin-bottom:0;line-height:1.6"><b>{trend["rec"]}</b></p></div>', unsafe_allow_html=True)
             
             st.markdown("---")
             st.markdown("### 📈 Statistik Prediksi")
