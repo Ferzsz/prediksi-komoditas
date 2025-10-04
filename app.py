@@ -105,9 +105,18 @@ def preprocess_commodity_data(df, commodity_index):
     
     return commodity_name, prices_final
 
-def predict_monthly(model, scaler, last_data, n_months, look_back=12):
-    """Prediksi harga per bulan"""
-    n_weeks = n_months * 4  # Asumsi 4 minggu per bulan
+def predict_until_target_date(model, scaler, last_data, target_month, target_year, look_back=12):
+    """Prediksi harga sampai bulan dan tahun tertentu"""
+    current_date = datetime.now()
+    target_date = datetime(target_year, target_month, 1)
+    
+    # Hitung jumlah bulan dari sekarang sampai target
+    months_diff = (target_date.year - current_date.year) * 12 + (target_date.month - current_date.month)
+    
+    if months_diff <= 0:
+        months_diff = 1
+    
+    n_weeks = months_diff * 4  # Konversi ke minggu
     
     predictions_weekly = []
     current_data = last_data[-look_back:].reshape(-1, 1)
@@ -128,7 +137,7 @@ def predict_monthly(model, scaler, last_data, n_months, look_back=12):
         monthly_avg = np.mean(chunk)
         predictions_monthly.append(monthly_avg)
     
-    return predictions_monthly, predictions_weekly
+    return predictions_monthly, predictions_weekly, months_diff
 
 def calculate_accuracy_metrics(actual, predicted):
     rmse = np.sqrt(np.mean((actual - predicted) ** 2))
@@ -211,7 +220,7 @@ def main():
                 # Pengaturan Prediksi
                 with st.container():
                     st.markdown("### Pengaturan Prediksi")
-                    col1, col2 = st.columns(2)
+                    col1, col2, col3 = st.columns(3)
                     
                     with col1:
                         selected_commodity = st.selectbox(
@@ -221,12 +230,23 @@ def main():
                         )
                     
                     with col2:
-                        n_months = st.selectbox(
-                            "Jumlah Bulan Prediksi:",
-                            options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                            index=5,
-                            key="n_months"
+                        target_year = st.selectbox(
+                            "Pilih Tahun:",
+                            options=[2025, 2026],
+                            index=0,
+                            key="pred_year"
                         )
+                    
+                    with col3:
+                        months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                                 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+                        target_month_name = st.selectbox(
+                            "Pilih Bulan:",
+                            options=months,
+                            index=0,
+                            key="pred_month"
+                        )
+                        target_month = months.index(target_month_name) + 1
                 
                 st.markdown("---")
                 
@@ -235,7 +255,9 @@ def main():
                 commodity_name, prices_final = preprocess_commodity_data(df_upload, commodity_idx)
                 
                 # Prediksi
-                predictions_monthly, predictions_weekly = predict_monthly(model, scaler, prices_final, n_months)
+                predictions_monthly, predictions_weekly, months_diff = predict_until_target_date(
+                    model, scaler, prices_final, target_month, target_year
+                )
                 
                 # Evaluasi
                 train_size = int(len(prices_final) * 0.8)
@@ -286,6 +308,7 @@ def main():
                         <div class="metric-box-2">
                             <h4>Harga Prediksi</h4>
                             <h2>Rp {predictions_monthly[-1]:,.0f}</h2>
+                            <p>{target_month_name} {target_year}</p>
                         </div>
                         """, unsafe_allow_html=True)
                     
@@ -327,12 +350,9 @@ def main():
                 with st.container():
                     st.markdown("### Tabel Prediksi Bulanan")
                     
-                    months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                             'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-                    
                     current_date = datetime.now()
                     prediction_months = []
-                    for i in range(n_months):
+                    for i in range(months_diff):
                         future_date = current_date + relativedelta(months=i+1)
                         month_name = months[future_date.month - 1]
                         prediction_months.append(f"{month_name} {future_date.year}")
@@ -386,7 +406,7 @@ def main():
                     ))
                     
                     fig_pred.update_layout(
-                        title=f"Prediksi Harga {selected_commodity} - {n_months} Bulan Ke Depan",
+                        title=f"Prediksi Harga {selected_commodity} sampai {target_month_name} {target_year}",
                         xaxis_title="Periode",
                         yaxis_title="Harga (Rp)",
                         hovermode='x unified',
