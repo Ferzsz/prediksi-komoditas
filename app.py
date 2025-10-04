@@ -21,7 +21,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS untuk padding dan styling modern
+# Custom CSS (sama seperti sebelumnya)
 st.markdown("""
     <style>
     .main .block-container {
@@ -147,8 +147,8 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("**Versi**")
     st.markdown("""
-    - TensorFlow/Keras 2.x
-    - Python 3.8+
+    - TensorFlow 2.20.0+
+    - Python 3.11+
     - Streamlit 1.x
     """)
 
@@ -252,7 +252,7 @@ if uploaded_file is not None:
                     df_transposed[komoditas_list] = df_transposed[komoditas_list].interpolate(method='linear', limit_direction='both')
                     df_transposed[komoditas_list] = df_transposed[komoditas_list].fillna(method='bfill').fillna(method='ffill')
                     
-                    # Normalisasi
+                    # PERBAIKAN: Normalisasi HANYA untuk komoditas yang dipilih
                     scaler = MinMaxScaler(feature_range=(0, 1))
                     commodity_data = df_transposed[selected_commodity].values.reshape(-1, 1)
                     normalized_data = scaler.fit_transform(commodity_data)
@@ -277,23 +277,26 @@ if uploaded_file is not None:
                     # Generate prediksi
                     TIME_STEPS = 20
                     predictions = []
+                    
+                    # PERBAIKAN: Input shape (1, TIME_STEPS, 1) - SINGLE FEATURE
                     current_sequence = normalized_data[-TIME_STEPS:].reshape(1, TIME_STEPS, 1)
                     
                     for _ in range(weeks_to_predict):
                         pred = model.predict(current_sequence, verbose=0)
-                        predictions.append(pred[0, 0])
-                        current_sequence = np.append(current_sequence[:, 1:, :], [[pred[0, 0]]], axis=1)
+                        predictions.append(pred[0, 0])  # Ambil prediksi untuk single commodity
+                        
+                        # Update sequence dengan prediksi terbaru
+                        new_pred = np.array([[[pred[0, 0]]]])  # Shape (1, 1, 1)
+                        current_sequence = np.append(current_sequence[:, 1:, :], new_pred, axis=1)
                     
                     # Inverse transform
                     predicted_price = scaler.inverse_transform([[predictions[-1]]])[0, 0]
                     
                     # ===========================================================================================
-                    # HITUNG METRIK EVALUASI (dari test data)
+                    # HITUNG METRIK EVALUASI
                     # ===========================================================================================
                     
-                    # Split data untuk evaluasi
                     split_idx = int(len(normalized_data) * 0.90)
-                    train_data = normalized_data[:split_idx]
                     test_data = normalized_data[split_idx:]
                     
                     # Generate sequences untuk testing
@@ -302,7 +305,7 @@ if uploaded_file is not None:
                         X_test.append(test_data[i-TIME_STEPS:i])
                         y_test.append(test_data[i])
                     
-                    X_test = np.array(X_test)
+                    X_test = np.array(X_test).reshape(-1, TIME_STEPS, 1)  # PERBAIKAN: Reshape ke (samples, TIME_STEPS, 1)
                     y_test = np.array(y_test)
                     
                     # Prediksi pada test set
@@ -310,8 +313,8 @@ if uploaded_file is not None:
                         y_pred = model.predict(X_test, verbose=0)
                         
                         # Inverse transform
-                        y_test_orig = scaler.inverse_transform(y_test)
-                        y_pred_orig = scaler.inverse_transform(y_pred)
+                        y_test_orig = scaler.inverse_transform(y_test.reshape(-1, 1))
+                        y_pred_orig = scaler.inverse_transform(y_pred.reshape(-1, 1))
                         
                         # Hitung metrik
                         rmse = np.sqrt(mean_squared_error(y_test_orig, y_pred_orig))
@@ -323,13 +326,12 @@ if uploaded_file is not None:
                         y_pred_orig = np.array([])
                     
                     # ===========================================================================================
-                    # TAMPILKAN HASIL
+                    # TAMPILKAN HASIL (Grafik visualization code tetap sama)
                     # ===========================================================================================
                     
                     st.markdown("---")
                     st.markdown("### Hasil Prediksi")
                     
-                    # Hasil prediksi dalam card
                     col_result1, col_result2, col_result3, col_result4 = st.columns(4)
                     
                     with col_result1:
@@ -368,18 +370,13 @@ if uploaded_file is not None:
                         )
                         st.markdown('</div>', unsafe_allow_html=True)
                     
-                    # ===========================================================================================
-                    # VISUALISASI GRAFIK
-                    # ===========================================================================================
-                    
+                    # Visualisasi (kode grafik tetap sama seperti sebelumnya)
                     st.markdown("---")
                     st.markdown("### Visualisasi Prediksi")
                     
-                    # Tab untuk memisahkan grafik
                     tab1, tab2, tab3 = st.tabs(["Grafik Prediksi Harga", "Grafik Prediksi vs Aktual (Test Data)", "Grafik Metrik Evaluasi"])
                     
                     with tab1:
-                        # GRAFIK 1: Prediksi Harga Future
                         historical_dates = df_transposed['Tanggal'].tolist()
                         historical_prices = df_transposed[selected_commodity].tolist()
                         
@@ -447,7 +444,6 @@ if uploaded_file is not None:
                         """, unsafe_allow_html=True)
                     
                     with tab2:
-                        # GRAFIK 2: Prediksi vs Aktual (Test Data)
                         if len(y_test_orig) > 0:
                             fig2 = go.Figure()
                             
@@ -479,36 +475,17 @@ if uploaded_file is not None:
                                 hovermode='x unified',
                                 template='plotly_white',
                                 height=500,
-                                showlegend=True,
-                                legend=dict(
-                                    orientation="h",
-                                    yanchor="bottom",
-                                    y=1.02,
-                                    xanchor="right",
-                                    x=1
-                                )
+                                showlegend=True
                             )
                             
                             st.plotly_chart(fig2, use_container_width=True)
-                            
-                            st.markdown(f"""
-                            <div class="info-box">
-                                <strong>Informasi Test Data:</strong><br>
-                                Total Test Samples: {len(y_test_orig)}<br>
-                                RMSE: Rp {rmse:,.0f}<br>
-                                MAE: Rp {mae:,.0f}<br>
-                                MAPE: {mape:.2f}%
-                            </div>
-                            """, unsafe_allow_html=True)
                         else:
                             st.warning("Tidak cukup data test untuk visualisasi")
                     
                     with tab3:
-                        # GRAFIK 3: Metrik Evaluasi (Bar Chart)
                         col_chart1, col_chart2 = st.columns(2)
                         
                         with col_chart1:
-                            # Bar chart untuk RMSE dan MAE
                             fig3 = go.Figure()
                             
                             fig3.add_trace(go.Bar(
@@ -537,7 +514,6 @@ if uploaded_file is not None:
                             st.plotly_chart(fig3, use_container_width=True)
                         
                         with col_chart2:
-                            # Gauge chart untuk MAPE
                             mape_color = '#27ae60' if mape < 5 else '#f39c12' if mape < 10 else '#e67e22' if mape < 20 else '#c0392b'
                             
                             fig4 = go.Figure(go.Indicator(
@@ -573,7 +549,6 @@ if uploaded_file is not None:
                             
                             st.plotly_chart(fig4, use_container_width=True)
                         
-                        # Interpretasi performa
                         if mape < 5:
                             performance = "Excellent"
                             color = "#27ae60"
@@ -604,7 +579,6 @@ if uploaded_file is not None:
     
     except Exception as e:
         st.error(f"Error saat membaca dataset: {str(e)}")
-        st.error("Pastikan format dataset sesuai dengan yang diharapkan")
 
 else:
     st.markdown('<div class="info-box">Silakan upload dataset untuk memulai prediksi</div>', unsafe_allow_html=True)
@@ -616,10 +590,6 @@ else:
     - **Kolom 3+**: Data harga dengan header tanggal (format: DD/ MM/ YYYY)
     - **File format**: Excel (.xlsx)
     """)
-
-# ===========================================================================================
-# FOOTER
-# ===========================================================================================
 
 st.markdown("---")
 st.markdown("""
