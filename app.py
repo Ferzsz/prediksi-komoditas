@@ -5,10 +5,10 @@ from tensorflow.keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
-
 # ===========================================================================================
 # KONFIGURASI HALAMAN
 # ===========================================================================================
@@ -289,8 +289,9 @@ if uploaded_file is not None:
                     split_idx = int(len(data_normalized) * 0.90)
                     test_data = data_normalized[split_idx:]
                     
-                    # Dictionary untuk menyimpan metrik semua komoditas
+                    # Dictionary untuk menyimpan metrik dan data prediksi semua komoditas
                     all_metrics = []
+                    all_predictions_data = {}
                     
                     X_test, y_test = [], []
                     for i in range(TIME_STEPS, len(test_data)):
@@ -321,6 +322,12 @@ if uploaded_file is not None:
                                 'MAE': mae_val,
                                 'MAPE': mape_val
                             })
+                            
+                            # Simpan data prediksi vs aktual untuk grafik
+                            all_predictions_data[commodity_name] = {
+                                'actual': y_test_orig.flatten(),
+                                'predicted': y_pred_orig.flatten()
+                            }
                         
                         # Ambil metrik untuk komoditas yang dipilih
                         selected_metrics = [m for m in all_metrics if m['Komoditas'] == selected_commodity][0]
@@ -329,15 +336,14 @@ if uploaded_file is not None:
                         mape = selected_metrics['MAPE']
                         
                         # Data untuk grafik prediksi vs aktual (komoditas terpilih)
-                        y_test_commodity = y_test[:, commodity_idx]
-                        y_pred_commodity = y_pred[:, commodity_idx]
-                        y_test_orig = scalers[selected_commodity].inverse_transform(y_test_commodity.reshape(-1, 1))
-                        y_pred_orig = scalers[selected_commodity].inverse_transform(y_pred_commodity.reshape(-1, 1))
+                        y_test_orig = all_predictions_data[selected_commodity]['actual']
+                        y_pred_orig = all_predictions_data[selected_commodity]['predicted']
                     else:
                         rmse, mae, mape = 0, 0, 0
                         y_test_orig = np.array([])
                         y_pred_orig = np.array([])
                         all_metrics = []
+                        all_predictions_data = {}
                     
                     # ===========================================================================================
                     # TAMPILKAN HASIL
@@ -379,7 +385,7 @@ if uploaded_file is not None:
                     st.markdown("---")
                     st.markdown("### Visualisasi Prediksi")
                     
-                    tab1, tab2, tab3 = st.tabs(["Grafik Prediksi Harga", "Grafik Metrik Evaluasi Keseluruhan", "Grafik Metrik Evaluasi"])
+                    tab1, tab2, tab3 = st.tabs(["Grafik Prediksi Harga", "Prediksi vs Aktual - Semua Komoditas", "Grafik Metrik Evaluasi"])
                     
                     with tab1:
                         historical_dates = df_transposed['Tanggal'].tolist()
@@ -429,128 +435,113 @@ if uploaded_file is not None:
                         """, unsafe_allow_html=True)
                     
                     with tab2:
-                        st.markdown("#### Evaluasi Performa Model untuk Semua Komoditas")
+                        st.markdown("#### Prediksi vs Aktual - Semua Komoditas (100 Epochs Optimal - Urut dari MAPE Terbaik)")
                         
-                        if len(all_metrics) > 0:
+                        if len(all_predictions_data) > 0:
+                            # Urutkan komoditas berdasarkan MAPE (terbaik ke terburuk)
                             df_metrics = pd.DataFrame(all_metrics)
+                            df_metrics_sorted = df_metrics.sort_values('MAPE')
                             
-                            # Visualisasi metrik keseluruhan
-                            col1, col2 = st.columns(2)
+                            # Buat subplot 8x4 = 32 grafik (untuk 31 komoditas)
+                            rows = 8
+                            cols = 4
                             
-                            with col1:
-                                # Grafik RMSE untuk semua komoditas
-                                fig_rmse = go.Figure()
-                                fig_rmse.add_trace(go.Bar(
-                                    x=df_metrics['Komoditas'],
-                                    y=df_metrics['RMSE'],
-                                    marker=dict(color='#3498db'),
-                                    text=df_metrics['RMSE'].apply(lambda x: f'Rp {x:,.0f}'),
-                                    textposition='outside',
-                                    textfont=dict(size=11)
-                                ))
-                                fig_rmse.update_layout(
-                                    title='Root Mean Squared Error (RMSE)',
-                                    xaxis_title='Komoditas',
-                                    yaxis_title='RMSE (Rp)',
-                                    height=500,
-                                    template='plotly_white',
-                                    xaxis={'tickangle': -45},
-                                    margin=dict(t=80, b=120, l=60, r=40)
-                                )
-                                st.plotly_chart(fig_rmse, use_container_width=True)
-                                
-                                # Indikator RMSE
-                                st.markdown("""
-                                **Interpretasi RMSE:**
-                                - Semakin **rendah** semakin baik
-                                - Mengukur rata-rata kesalahan prediksi
-                                - Sensitif terhadap outlier
-                                - Satuan: Rupiah (Rp)
-                                """)
-                            
-                            with col2:
-                                # Grafik MAE untuk semua komoditas
-                                fig_mae = go.Figure()
-                                fig_mae.add_trace(go.Bar(
-                                    x=df_metrics['Komoditas'],
-                                    y=df_metrics['MAE'],
-                                    marker=dict(color='#e74c3c'),
-                                    text=df_metrics['MAE'].apply(lambda x: f'Rp {x:,.0f}'),
-                                    textposition='outside',
-                                    textfont=dict(size=11)
-                                ))
-                                fig_mae.update_layout(
-                                    title='Mean Absolute Error (MAE)',
-                                    xaxis_title='Komoditas',
-                                    yaxis_title='MAE (Rp)',
-                                    height=500,
-                                    template='plotly_white',
-                                    xaxis={'tickangle': -45},
-                                    margin=dict(t=80, b=120, l=60, r=40)
-                                )
-                                st.plotly_chart(fig_mae, use_container_width=True)
-                                
-                                # Indikator MAE
-                                st.markdown("""
-                                **Interpretasi MAE:**
-                                - Semakin **rendah** semakin baik
-                                - Lebih mudah diinterpretasi
-                                - Kurang sensitif terhadap outlier
-                                - Satuan: Rupiah (Rp)
-                                """)
-                            
-                            # Grafik MAPE - Full width
-                            fig_mape = go.Figure()
-                            
-                            # Tentukan warna berdasarkan MAPE
-                            colors = []
-                            for val in df_metrics['MAPE']:
-                                if val < 5:
-                                    colors.append('#27ae60')
-                                elif val < 10:
-                                    colors.append('#f39c12')
-                                elif val < 20:
-                                    colors.append('#e67e22')
-                                else:
-                                    colors.append('#c0392b')
-                            
-                            fig_mape.add_trace(go.Bar(
-                                x=df_metrics['Komoditas'],
-                                y=df_metrics['MAPE'],
-                                marker=dict(color=colors),
-                                text=df_metrics['MAPE'].apply(lambda x: f'{x:.2f}%'),
-                                textposition='outside',
-                                textfont=dict(size=12)
-                            ))
-                            fig_mape.update_layout(
-                                title='Mean Absolute Percentage Error (MAPE)',
-                                xaxis_title='Komoditas',
-                                yaxis_title='MAPE (%)',
-                                height=500,
-                                template='plotly_white',
-                                xaxis={'tickangle': -45},
-                                margin=dict(t=80, b=120, l=60, r=60)
+                            fig = make_subplots(
+                                rows=rows, cols=cols,
+                                subplot_titles=[f"{row['Komoditas']}<br>MAPE: {row['MAPE']:.2f}%" 
+                                              for _, row in df_metrics_sorted.iterrows()],
+                                vertical_spacing=0.08,
+                                horizontal_spacing=0.06
                             )
-                            st.plotly_chart(fig_mape, use_container_width=True)
                             
-                            # Indikator MAPE dengan kategori
-                            st.markdown("""
-                            **Interpretasi MAPE & Standar Performa:**
+                            # Tambahkan grafik untuk setiap komoditas
+                            for idx, (_, row) in enumerate(df_metrics_sorted.iterrows()):
+                                commodity_name = row['Komoditas']
+                                mape_val = row['MAPE']
+                                
+                                actual_data = all_predictions_data[commodity_name]['actual']
+                                predicted_data = all_predictions_data[commodity_name]['predicted']
+                                
+                                # Tentukan warna MAPE
+                                if mape_val < 5:
+                                    mape_color = '#27ae60'  # Green
+                                elif mape_val < 10:
+                                    mape_color = '#f39c12'  # Yellow
+                                elif mape_val < 20:
+                                    mape_color = '#e67e22'  # Orange
+                                else:
+                                    mape_color = '#c0392b'  # Red
+                                
+                                row_num = idx // cols + 1
+                                col_num = idx % cols + 1
+                                
+                                # Line Aktual (biru)
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=list(range(len(actual_data))),
+                                        y=actual_data,
+                                        mode='lines',
+                                        name='Aktual',
+                                        line=dict(color='#2E86AB', width=1.5),
+                                        showlegend=(idx == 0),
+                                        legendgroup='actual'
+                                    ),
+                                    row=row_num, col=col_num
+                                )
+                                
+                                # Line Prediksi (merah putus-putus)
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=list(range(len(predicted_data))),
+                                        y=predicted_data,
+                                        mode='lines',
+                                        name='Prediksi',
+                                        line=dict(color='#E63946', width=1.5, dash='dash'),
+                                        showlegend=(idx == 0),
+                                        legendgroup='predicted'
+                                    ),
+                                    row=row_num, col=col_num
+                                )
+                                
+                                # Update axes untuk subplot ini
+                                fig.update_xaxes(title_text="Time Step", row=row_num, col=col_num, title_font=dict(size=9))
+                                fig.update_yaxes(title_text="Harga (Rp)", row=row_num, col=col_num, title_font=dict(size=9))
                             
-                            | Kategori | Range MAPE | Kualitas Model |
-                            |----------|------------|----------------|
-                            | 🟢 Excellent | < 5% | Model sangat akurat |
-                            | 🟡 Good | 5% - 10% | Model akurat |
-                            | 🟠 Fair | 10% - 20% | Model cukup baik |
-                            | 🔴 Poor | > 20% | Model perlu perbaikan |
+                            # Update layout keseluruhan
+                            fig.update_layout(
+                                height=2800,
+                                showlegend=True,
+                                template='plotly_white',
+                                title_text="",
+                                legend=dict(
+                                    orientation="h",
+                                    yanchor="top",
+                                    y=1.01,
+                                    xanchor="center",
+                                    x=0.5,
+                                    font=dict(size=12)
+                                )
+                            )
                             
-                            **Catatan:**
-                            - MAPE < 10% umumnya dianggap **sangat baik** untuk prediksi harga komoditas
-                            - Target ideal: MAPE < 5%
-                            - Nilai mendekati 0% = prediksi sempurna
-                            """)
+                            # Update font size untuk subtitle
+                            for annotation in fig['layout']['annotations']:
+                                annotation['font'] = dict(size=9)
+                            
+                            st.plotly_chart(fig, use_container_width=True)
+                            
+                            # Tampilkan tabel metrik
+                            st.markdown("#### Tabel Metrik Evaluasi (Urut dari MAPE Terbaik)")
+                            
+                            # Format tabel
+                            df_display = df_metrics_sorted.copy()
+                            df_display['RMSE'] = df_display['RMSE'].apply(lambda x: f"Rp {x:,.0f}")
+                            df_display['MAE'] = df_display['MAE'].apply(lambda x: f"Rp {x:,.0f}")
+                            df_display['MAPE'] = df_display['MAPE'].apply(lambda x: f"{x:.2f}%")
+                            
+                            st.dataframe(df_display, use_container_width=True, height=400)
+                            
                         else:
-                            st.warning("Tidak cukup data test untuk menghitung metrik evaluasi")
+                            st.warning("Tidak cukup data test untuk visualisasi")
                     
                     with tab3:
                         st.markdown(f"#### Evaluasi Metrik - {selected_commodity}")
@@ -572,7 +563,7 @@ if uploaded_file is not None:
                                 yaxis_title='Nilai (Rp)', 
                                 template='plotly_white', 
                                 height=450,
-                                margin=dict(t=80, b=60, l=60, r=60),
+                                margin=dict(t=80, b=60, l=80, r=60),
                                 showlegend=False
                             )
                             st.plotly_chart(fig3, use_container_width=True)
@@ -619,6 +610,15 @@ if uploaded_file is not None:
                         **Evaluasi:** {'🟢 Excellent - Model sangat akurat!' if mape < 5 else '🟡 Good - Model akurat' if mape < 10 else '🟠 Fair - Model cukup baik' if mape < 20 else '🔴 Poor - Model perlu ditingkatkan'}
                         
                         **Interpretasi Standar:**
+                        
+                        | Kategori | Range MAPE | Kualitas Model |
+                        |----------|------------|----------------|
+                        | 🟢 Excellent | < 5% | Model sangat akurat |
+                        | 🟡 Good | 5% - 10% | Model akurat |
+                        | 🟠 Fair | 10% - 20% | Model cukup baik |
+                        | 🔴 Poor | > 20% | Model perlu perbaikan |
+                        
+                        **Catatan:**
                         - RMSE dan MAE lebih rendah menunjukkan prediksi lebih akurat dalam satuan Rupiah
                         - MAPE memberikan perspektif persentase error yang mudah dipahami
                         - Untuk prediksi harga komoditas, MAPE < 10% dianggap hasil yang sangat baik
