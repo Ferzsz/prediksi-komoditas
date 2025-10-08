@@ -87,6 +87,14 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     
+    .warning-box {
+        background-color: #fff3cd;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #ffc107;
+        margin-bottom: 1rem;
+    }
+    
     [data-testid="stMetricValue"] {
         font-size: 2rem;
         font-weight: bold;
@@ -99,6 +107,85 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
+# ===========================================================================================
+# FUNGSI UNTUK LOAD DAN VALIDASI METRIK
+# ===========================================================================================
+
+def load_and_validate_metrics(komoditas_list_from_dataset):
+    """
+    Load pre-computed metrics dan validasi apakah cocok dengan dataset yang di-upload
+    Jika tidak cocok, akan return None untuk menghitung ulang secara real-time
+    """
+    try:
+        df_eval = pd.read_csv('hasil_evaluasi_lstm_100epochs.csv')
+        
+        # Validasi: Cek apakah komoditas di CSV sama dengan dataset yang di-upload
+        csv_komoditas = set(df_eval['Komoditas'].tolist())
+        dataset_komoditas = set(komoditas_list_from_dataset)
+        
+        # Jika komoditas di CSV dan dataset TIDAK sama persis, return None
+        if csv_komoditas != dataset_komoditas:
+            st.warning(f"""
+            ⚠️ **Dataset berbeda terdeteksi!**
+            
+            - Komoditas di file evaluasi: {len(csv_komoditas)} items
+            - Komoditas di dataset upload: {len(dataset_komoditas)} items
+            
+            Sistem akan menghitung metrik evaluasi secara **real-time** berdasarkan dataset yang baru diupload.
+            """)
+            return None, "different_dataset"
+        
+        # Jika sama, gunakan metrik dari CSV
+        st.info("✅ Menggunakan metrik evaluasi pre-computed dari hasil training (100 epochs optimal)")
+        return df_eval, "same_dataset"
+        
+    except FileNotFoundError:
+        st.info("ℹ️ File evaluasi pre-computed tidak ditemukan. Menghitung metrik secara real-time...")
+        return None, "file_not_found"
+    except Exception as e:
+        st.warning(f"⚠️ Error loading evaluation file: {str(e)}. Menghitung metrik secara real-time...")
+        return None, "error"
+
+def calculate_metrics_realtime(model, data_normalized, scalers, komoditas_list, TIME_STEPS=20):
+    """
+    Hitung metrik evaluasi secara real-time dari dataset yang di-upload
+    """
+    split_idx = int(len(data_normalized) * 0.90)
+    test_data = data_normalized[split_idx:]
+    
+    all_metrics = []
+    X_test, y_test = [], []
+    
+    for i in range(TIME_STEPS, len(test_data)):
+        X_test.append(test_data[i-TIME_STEPS:i])
+        y_test.append(test_data[i])
+    
+    X_test = np.array(X_test)
+    y_test = np.array(y_test)
+    
+    if len(X_test) > 0:
+        y_pred = model.predict(X_test, verbose=0)
+        
+        for idx, commodity_name in enumerate(komoditas_list):
+            y_test_commodity = y_test[:, idx]
+            y_pred_commodity = y_pred[:, idx]
+            
+            y_test_orig = scalers[commodity_name].inverse_transform(y_test_commodity.reshape(-1, 1))
+            y_pred_orig = scalers[commodity_name].inverse_transform(y_pred_commodity.reshape(-1, 1))
+            
+            rmse_val = np.sqrt(mean_squared_error(y_test_orig, y_pred_orig))
+            mae_val = mean_absolute_error(y_test_orig, y_pred_orig)
+            mape_val = np.mean(np.abs((y_test_orig - y_pred_orig) / y_test_orig)) * 100
+            
+            all_metrics.append({
+                'Komoditas': commodity_name,
+                'RMSE': rmse_val,
+                'MAE': mae_val,
+                'MAPE': mape_val
+            })
+    
+    return all_metrics
 
 # ===========================================================================================
 # SIDEBAR
@@ -283,61 +370,29 @@ if uploaded_file is not None:
                     predicted_price = scalers[selected_commodity].inverse_transform([[predicted_price_norm]])[0, 0]
                     
                     # ===========================================================================================
-                    # HITUNG METRIK UNTUK SEMUA KOMODITAS
+                    # VALIDASI DAN LOAD/HITUNG METRIK
                     # ===========================================================================================
                     
-                    split_idx = int(len(data_normalized) * 0.90)
-                    test_data = data_normalized[split_idx:]
+                    df_eval_metrics, status = load_and_validate_metrics(komoditas_list)
                     
-                    # Dictionary untuk menyimpan metrik semua komoditas
-                    all_metrics = []
+                    if df_eval_metrics is not None and status == "same_dataset":
+                        # Gunakan metrik dari CSV (dataset sama)
+                        all_metrics = df_eval_metrics.rename(columns={'MAPE (%)': 'MAPE'}).to_dict('records')
+                        metric_source = "pre-computed (100 epochs optimal)"
+                    else:
+                        # Hitung metrik secara real-time (dataset berbeda atau file tidak ada)
+                        with st.spinner("Menghitung metrik evaluasi untuk dataset baru..."):
+                            all_metrics = calculate_metrics_realtime(model, data_normalized, scalers, komoditas_list, TIME_STEPS)
+                        metric_source = "real-time calculation"
                     
-                    X_test, y_test = [], []
-                    for i in range(TIME_STEPS, len(test_data)):
-                        X_test.append(test_data[i-TIME_STEPS:i])
-                        y_test.append(test_data[i])
-                    
-                    X_test = np.array(X_test)
-                    y_test = np.array(y_test)
-                    
-                    if len(X_test) > 0:
-                        y_pred = model.predict(X_test, verbose=0)
-                        
-                        # Hitung metrik untuk setiap komoditas
-                        for idx, commodity_name in enumerate(komoditas_list):
-                            y_test_commodity = y_test[:, idx]
-                            y_pred_commodity = y_pred[:, idx]
-                            
-                            y_test_orig = scalers[commodity_name].inverse_transform(y_test_commodity.reshape(-1, 1))
-                            y_pred_orig = scalers[commodity_name].inverse_transform(y_pred_commodity.reshape(-1, 1))
-                            
-                            rmse_val = np.sqrt(mean_squared_error(y_test_orig, y_pred_orig))
-                            mae_val = mean_absolute_error(y_test_orig, y_pred_orig)
-                            mape_val = np.mean(np.abs((y_test_orig - y_pred_orig) / y_test_orig)) * 100
-                            
-                            all_metrics.append({
-                                'Komoditas': commodity_name,
-                                'RMSE': rmse_val,
-                                'MAE': mae_val,
-                                'MAPE': mape_val
-                            })
-                        
-                        # Ambil metrik untuk komoditas yang dipilih
+                    # Ambil metrik untuk komoditas yang dipilih
+                    if len(all_metrics) > 0:
                         selected_metrics = [m for m in all_metrics if m['Komoditas'] == selected_commodity][0]
                         rmse = selected_metrics['RMSE']
                         mae = selected_metrics['MAE']
                         mape = selected_metrics['MAPE']
-                        
-                        # Data untuk grafik prediksi vs aktual (komoditas terpilih)
-                        y_test_commodity = y_test[:, commodity_idx]
-                        y_pred_commodity = y_pred[:, commodity_idx]
-                        y_test_orig = scalers[selected_commodity].inverse_transform(y_test_commodity.reshape(-1, 1))
-                        y_pred_orig = scalers[selected_commodity].inverse_transform(y_pred_commodity.reshape(-1, 1))
                     else:
                         rmse, mae, mape = 0, 0, 0
-                        y_test_orig = np.array([])
-                        y_pred_orig = np.array([])
-                        all_metrics = []
                     
                     # ===========================================================================================
                     # TAMPILKAN HASIL
@@ -345,6 +400,12 @@ if uploaded_file is not None:
                     
                     st.markdown("---")
                     st.markdown("### Hasil Prediksi")
+                    
+                    # Info sumber metrik
+                    if metric_source == "pre-computed (100 epochs optimal)":
+                        st.markdown('<div class="info-box">📊 <strong>Metrik Evaluasi:</strong> Menggunakan hasil pre-computed dari training 100 epochs (dataset original)</div>', unsafe_allow_html=True)
+                    else:
+                        st.markdown('<div class="warning-box">📊 <strong>Metrik Evaluasi:</strong> Dihitung secara real-time dari dataset yang baru diupload</div>', unsafe_allow_html=True)
                     
                     col_result1, col_result2, col_result3, col_result4 = st.columns(4)
                     
@@ -429,7 +490,8 @@ if uploaded_file is not None:
                         """, unsafe_allow_html=True)
                     
                     with tab2:
-                        st.markdown("#### Evaluasi Performa Model untuk Semua Komoditas")
+                        st.markdown(f"#### Evaluasi Performa Model untuk Semua Komoditas")
+                        st.markdown(f"*Sumber metrik: {metric_source}*")
                         
                         if len(all_metrics) > 0:
                             df_metrics = pd.DataFrame(all_metrics)
@@ -464,9 +526,9 @@ if uploaded_file is not None:
                                 **Interpretasi RMSE:**
                                 - Semakin **rendah** semakin baik
                                 - Mengukur rata-rata kesalahan prediksi
-                                - Sensitif terhadap outlier (penalti lebih besar untuk error besar)
+                                - Sensitif terhadap outlier
                                 - Satuan: Rupiah (Rp)
-                                - **Score bagus:** Relatif terhadap rentang harga komoditas (semakin kecil % dari harga rata-rata, semakin baik)
+                                - **Score bagus:** Relatif terhadap rentang harga
                                 """)
                             
                             with col2:
@@ -495,24 +557,23 @@ if uploaded_file is not None:
                                 st.markdown("""
                                 **Interpretasi MAE:**
                                 - Semakin **rendah** semakin baik
-                                - Lebih mudah diinterpretasi (rata-rata error absolut)
-                                - Kurang sensitif terhadap outlier dibanding RMSE
+                                - Lebih mudah diinterpretasi
+                                - Kurang sensitif terhadap outlier
                                 - Satuan: Rupiah (Rp)
-                                - **Score bagus:** MAE yang mendekati 0 atau < 5% dari nilai rata-rata
+                                - **Score bagus:** MAE < 5% dari nilai rata-rata
                                 """)
                             
                             # Grafik MAPE - Full width
-                            # Tentukan warna berdasarkan MAPE
                             colors = []
                             for val in df_metrics['MAPE']:
                                 if val < 5:
-                                    colors.append('#27ae60')  # Excellent
+                                    colors.append('#27ae60')
                                 elif val < 10:
-                                    colors.append('#f39c12')  # Good
+                                    colors.append('#f39c12')
                                 elif val < 20:
-                                    colors.append('#e67e22')  # Fair
+                                    colors.append('#e67e22')
                                 else:
-                                    colors.append('#c0392b')  # Poor
+                                    colors.append('#c0392b')
                             
                             fig_mape = go.Figure()
                             fig_mape.add_trace(go.Bar(
@@ -534,53 +595,52 @@ if uploaded_file is not None:
                             )
                             st.plotly_chart(fig_mape, use_container_width=True)
                             
-                            # Indikator MAPE dengan kategori dan score
+                            # Indikator MAPE
                             st.markdown("""
                             **Interpretasi MAPE & Indikator Score yang Bagus:**
                             
-                            MAPE (Mean Absolute Percentage Error) mengukur rata-rata persentase kesalahan prediksi relatif terhadap nilai aktual. 
-                            Nilai yang lebih rendah menunjukkan model lebih akurat.
-                            
                             | Kategori | Range MAPE | Kualitas Model | Interpretasi |
                             |----------|------------|----------------|--------------|
-                            | 🟢 **Excellent** | **< 5%** | Model sangat akurat | Prediksi sangat dekat dengan nilai aktual, error rata-rata < 5% |
-                            | 🟡 **Good** | **5% - 10%** | Model akurat | Prediksi akurat dengan error yang dapat diterima untuk forecasting |
-                            | 🟠 **Fair** | **10% - 20%** | Model cukup baik | Model masih dapat digunakan, namun perlu monitoring |
-                            | 🔴 **Poor** | **> 20%** | Model perlu perbaikan | Error terlalu besar, model memerlukan optimasi atau re-training |
+                            | 🟢 **Excellent** | **< 5%** | Model sangat akurat | Error rata-rata < 5% |
+                            | 🟡 **Good** | **5% - 10%** | Model akurat | Error dapat diterima |
+                            | 🟠 **Fair** | **10% - 20%** | Model cukup baik | Perlu monitoring |
+                            | 🔴 **Poor** | **> 20%** | Model perlu perbaikan | Error terlalu besar |
                             
-                            **Catatan Penting:**
-                            - **Target ideal untuk prediksi harga komoditas: MAPE < 10%** (kategori Excellent atau Good)
-                            - MAPE < 5% dianggap **performa luar biasa** dalam forecasting
+                            **Catatan:**
+                            - Target ideal: MAPE < 10%
+                            - MAPE < 5% = performa luar biasa
                             - Nilai mendekati 0% = prediksi hampir sempurna
-                            - MAPE > 20% mengindikasikan model perlu ditingkatkan dengan:
-                              - Hyperparameter tuning lebih lanjut
-                              - Penambahan fitur atau data training
-                              - Arsitektur model yang berbeda
-                            
-                            **Contoh Interpretasi:**
-                            - MAPE 2.71% = Prediksi rata-rata meleset hanya 2.71% dari nilai aktual (**Excellent**)
-                            - MAPE 7.5% = Prediksi rata-rata meleset 7.5% dari nilai aktual (**Good**)
-                            - MAPE 15% = Prediksi rata-rata meleset 15% dari nilai aktual (**Fair**)
                             """)
                             
-                            # Tampilkan ringkasan performa
+                            # Ringkasan performa
                             excellent_count = len(df_metrics[df_metrics['MAPE'] < 5])
                             good_count = len(df_metrics[(df_metrics['MAPE'] >= 5) & (df_metrics['MAPE'] < 10)])
                             fair_count = len(df_metrics[(df_metrics['MAPE'] >= 10) & (df_metrics['MAPE'] < 20)])
                             poor_count = len(df_metrics[df_metrics['MAPE'] >= 20])
                             
                             st.markdown(f"""
-                            **Ringkasan Performa Model Keseluruhan:**
-                            - 🟢 Excellent (< 5%): **{excellent_count} komoditas** ({excellent_count/len(df_metrics)*100:.1f}%)
-                            - 🟡 Good (5-10%): **{good_count} komoditas** ({good_count/len(df_metrics)*100:.1f}%)
-                            - 🟠 Fair (10-20%): **{fair_count} komoditas** ({fair_count/len(df_metrics)*100:.1f}%)
-                            - 🔴 Poor (> 20%): **{poor_count} komoditas** ({poor_count/len(df_metrics)*100:.1f}%)
+                            **Ringkasan Performa Model:**
+                            - 🟢 Excellent: **{excellent_count}** ({excellent_count/len(df_metrics)*100:.1f}%)
+                            - 🟡 Good: **{good_count}** ({good_count/len(df_metrics)*100:.1f}%)
+                            - 🟠 Fair: **{fair_count}** ({fair_count/len(df_metrics)*100:.1f}%)
+                            - 🔴 Poor: **{poor_count}** ({poor_count/len(df_metrics)*100:.1f}%)
                             
-                            **Kesimpulan:** {'Model memiliki performa sangat baik pada mayoritas komoditas!' if (excellent_count + good_count) / len(df_metrics) >= 0.8 else 'Model memiliki performa baik, namun beberapa komoditas perlu optimasi lebih lanjut.' if (excellent_count + good_count) / len(df_metrics) >= 0.6 else 'Model perlu perbaikan signifikan untuk meningkatkan akurasi prediksi.'}
+                            **Kesimpulan:** {'Model sangat baik!' if (excellent_count + good_count) / len(df_metrics) >= 0.8 else 'Model baik, beberapa perlu optimasi' if (excellent_count + good_count) / len(df_metrics) >= 0.6 else 'Model perlu perbaikan signifikan'}
                             """)
                             
+                            # Tabel metrik
+                            st.markdown("---")
+                            st.markdown("#### Tabel Detail Metrik Evaluasi")
+                            
+                            df_display = df_metrics.copy()
+                            df_display['RMSE'] = df_display['RMSE'].apply(lambda x: f"Rp {x:,.2f}")
+                            df_display['MAE'] = df_display['MAE'].apply(lambda x: f"Rp {x:,.2f}")
+                            df_display['MAPE'] = df_display['MAPE'].apply(lambda x: f"{x:.2f}%")
+                            
+                            st.dataframe(df_display, use_container_width=True, height=400)
+                            
                         else:
-                            st.warning("Tidak cukup data test untuk menghitung metrik evaluasi")
+                            st.warning("Tidak cukup data test untuk evaluasi")
                     
                     with tab3:
                         st.markdown(f"#### Evaluasi Metrik - {selected_commodity}")
@@ -608,7 +668,6 @@ if uploaded_file is not None:
                             st.plotly_chart(fig3, use_container_width=True)
                         
                         with col_chart2:
-                            # Gauge MAPE dengan indikator yang jelas
                             mape_color = '#27ae60' if mape < 5 else '#f39c12' if mape < 10 else '#e67e22' if mape < 20 else '#c0392b'
                             
                             fig4 = go.Figure(go.Indicator(
@@ -639,29 +698,15 @@ if uploaded_file is not None:
                             )
                             st.plotly_chart(fig4, use_container_width=True)
                         
-                        # Tambahkan penjelasan score
                         st.markdown(f"""
-                        **Status Performa Model untuk {selected_commodity}:**
-                        - **RMSE:** Rp {rmse:,.0f} (nilai absolut error dalam Rupiah)
-                        - **MAE:** Rp {mae:,.0f} (rata-rata kesalahan prediksi)
-                        - **MAPE:** {mape:.2f}% (persentase error relatif)
+                        **Status Performa - {selected_commodity}:**
+                        - **RMSE:** Rp {rmse:,.2f}
+                        - **MAE:** Rp {mae:,.2f}
+                        - **MAPE:** {mape:.2f}%
                         
-                        **Evaluasi:** {'🟢 Excellent - Model sangat akurat!' if mape < 5 else '🟡 Good - Model akurat' if mape < 10 else '🟠 Fair - Model cukup baik' if mape < 20 else '🔴 Poor - Model perlu ditingkatkan'}
+                        **Evaluasi:** {'🟢 Excellent' if mape < 5 else '🟡 Good' if mape < 10 else '🟠 Fair' if mape < 20 else '🔴 Poor'}
                         
-                        **Interpretasi Standar:**
-                        
-                        | Kategori | Range MAPE | Kualitas Model |
-                        |----------|------------|----------------|
-                        | 🟢 Excellent | < 5% | Model sangat akurat |
-                        | 🟡 Good | 5% - 10% | Model akurat |
-                        | 🟠 Fair | 10% - 20% | Model cukup baik |
-                        | 🔴 Poor | > 20% | Model perlu perbaikan |
-                        
-                        **Catatan:**
-                        - RMSE dan MAE lebih rendah menunjukkan prediksi lebih akurat dalam satuan Rupiah
-                        - MAPE memberikan perspektif persentase error yang mudah dipahami
-                        - Untuk prediksi harga komoditas, MAPE < 10% dianggap hasil yang sangat baik
-                        - Score MAPE {mape:.2f}% berarti prediksi rata-rata meleset {mape:.2f}% dari nilai aktual
+                        **Interpretasi:** MAPE {mape:.2f}% berarti prediksi rata-rata meleset {mape:.2f}% dari nilai aktual
                         """)
                     
                 except Exception as e:
@@ -678,7 +723,7 @@ else:
     st.markdown("""
     - **Kolom 1**: No (1, 2, 3, ...)
     - **Kolom 2**: Nama Komoditas
-    - **Kolom 3+**: Data harga dengan header tanggal (format: DD/ MM/ YYYY)
+    - **Kolom 3+**: Data harga dengan header tanggal
     - **File format**: Excel (.xlsx)
     """)
 
