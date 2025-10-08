@@ -515,17 +515,6 @@ if uploaded_file is not None:
                         
                         st.plotly_chart(fig1, use_container_width=True)
                         
-                        st.markdown(f"""
-                        <div class="info-box">
-                            <strong>Informasi Prediksi:</strong><br>
-                            Komoditas: {selected_commodity}<br>
-                            Periode Target: {period_info}<br>
-                            Tanggal Target: {target_date.strftime('%d %B %Y')}<br>
-                            Minggu Prediksi: {weeks_to_predict} minggu<br>
-                            Tanggal Data Terakhir: {last_date.strftime('%d %B %Y')}
-                        </div>
-                        """, unsafe_allow_html=True)
-                    
                     with tab2:
                         # [Kode Tab 2 sama seperti sebelumnya - Grafik Metrik Evaluasi Keseluruhan]
                         st.markdown(f"#### Evaluasi Performa Model untuk Semua Komoditas")
