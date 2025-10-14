@@ -21,153 +21,284 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS - Enhanced Modern & Elegant Design
+# Custom CSS with Tailwind-inspired styling
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
     
     * {
         font-family: 'Inter', sans-serif;
     }
     
     .main .block-container {
-        padding-top: 3rem;
-        padding-bottom: 3rem;
-        padding-left: 4rem;
-        padding-right: 4rem;
-        max-width: 1600px;
+        padding: 3rem 5rem;
+        max-width: 1800px;
+        background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
     }
     
+    /* Sidebar Modern Styling */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-        padding: 2.5rem 1.5rem;
-        border-right: 1px solid #e2e8f0;
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        padding: 2rem 1.5rem;
+        border-right: none;
+    }
+    
+    [data-testid="stSidebar"] * {
+        color: #e2e8f0 !important;
+    }
+    
+    [data-testid="stSidebar"] h3 {
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 1.2rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+    }
+    
+    [data-testid="stSidebar"] hr {
+        border-color: #334155;
+        margin: 1.5rem 0;
+    }
+    
+    [data-testid="stSidebar"] strong {
+        color: #ffffff !important;
+        font-weight: 700;
+    }
+    
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 4rem 3rem;
+        border-radius: 24px;
+        margin-bottom: 3rem;
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
     }
     
     .title-text {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-size: 3rem;
+        color: white;
+        font-size: 3.5rem;
         font-weight: 900;
-        margin-bottom: 0.75rem;
-        letter-spacing: -0.03em;
-        line-height: 1.2;
+        margin-bottom: 1rem;
+        letter-spacing: -0.04em;
+        line-height: 1.1;
+        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 1;
     }
     
     .subtitle-text {
-        color: #64748b;
-        font-size: 1.15rem;
-        margin-bottom: 2.5rem;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.3rem;
+        margin-bottom: 0;
         font-weight: 400;
         letter-spacing: -0.01em;
+        position: relative;
+        z-index: 1;
     }
     
+    /* Card Container */
+    .card-container {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .card-container:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+    
+    /* Section Header */
     .section-header {
-        font-size: 1.75rem;
-        font-weight: 700;
+        font-size: 2rem;
+        font-weight: 800;
         color: #1e293b;
-        margin-top: 2.5rem;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.75rem;
-        padding-left: 1rem;
-        border-left: 5px solid #667eea;
+        margin: 3rem 0 2rem 0;
+        padding-left: 1.5rem;
+        border-left: 6px solid #667eea;
         letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
     }
     
-    /* Custom alert boxes with better padding */
-    .custom-alert {
-        padding: 1.25rem 1.75rem;
-        border-radius: 14px;
-        margin: 1.5rem 0;
-        border-left: 5px solid;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        font-size: 0.95rem;
-        line-height: 1.6;
+    .section-header::before {
+        content: '';
+        width: 12px;
+        height: 12px;
+        background: #667eea;
+        border-radius: 50%;
+        margin-right: 1rem;
+        margin-left: -1.9rem;
+    }
+    
+    /* Custom Alert Boxes - Tailwind Style */
+    .alert-modern {
+        padding: 1.5rem 2rem;
+        border-radius: 16px;
+        margin: 2rem 0;
+        border-left: 6px solid;
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .alert-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 6px;
+        height: 100%;
+        animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
     }
     
     .alert-success {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        background: linear-gradient(135deg, rgba(209, 250, 229, 0.8) 0%, rgba(167, 243, 208, 0.8) 100%);
         border-color: #10b981;
         color: #065f46;
     }
     
     .alert-info {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        background: linear-gradient(135deg, rgba(219, 234, 254, 0.8) 0%, rgba(191, 219, 254, 0.8) 100%);
         border-color: #3b82f6;
         color: #1e40af;
     }
     
     .alert-warning {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        background: linear-gradient(135deg, rgba(254, 243, 199, 0.8) 0%, rgba(253, 230, 138, 0.8) 100%);
         border-color: #f59e0b;
         color: #92400e;
     }
     
-    /* Streamlit native components enhancement */
+    /* Metric Cards Enhancement */
     [data-testid="stMetricValue"] {
-        font-size: 2.5rem;
-        font-weight: 800;
+        font-size: 3rem;
+        font-weight: 900;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.03em;
     }
     
     [data-testid="stMetricLabel"] {
-        font-size: 1rem;
+        font-size: 0.95rem;
         color: #64748b;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 0.5rem;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.75rem;
     }
     
-    /* Enhanced metric delta */
-    [data-testid="stMetricDelta"] {
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-    
-    /* File uploader styling with better spacing */
+    /* File Uploader Modern */
     [data-testid="stFileUploader"] {
-        background: white;
-        border: 2px dashed #cbd5e1;
-        border-radius: 16px;
-        padding: 3rem 2rem;
-        transition: all 0.3s ease;
-        margin: 1.5rem 0;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 3px dashed #cbd5e1;
+        border-radius: 20px;
+        padding: 4rem 3rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        margin: 2rem 0;
+        position: relative;
+    }
+    
+    [data-testid="stFileUploader"]::before {
+        content: '📁';
+        font-size: 4rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.1;
+        pointer-events: none;
     }
     
     [data-testid="stFileUploader"]:hover {
         border-color: #667eea;
-        background: #f8fafc;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        background: linear-gradient(135deg, #f8fafc 0%, #ede9fe 100%);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.15);
+        transform: translateY(-4px);
     }
     
-    /* Tab styling - Modern & Clean */
+    /* Selectbox Modern */
+    .stSelectbox > div > div {
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .stSelectbox > div > div:hover {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .stSelectbox > div > div:focus-within {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+    }
+    
+    /* Tab Styling - Ultra Modern */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 12px;
-        background-color: #f1f5f9;
-        border-radius: 14px;
-        padding: 8px;
-        margin-bottom: 2rem;
+        gap: 16px;
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border-radius: 20px;
+        padding: 12px;
+        margin-bottom: 2.5rem;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.06);
     }
     
     .stTabs [data-baseweb="tab"] {
-        border-radius: 10px;
-        padding: 14px 28px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
-        letter-spacing: 0.01em;
+        border-radius: 14px;
+        padding: 16px 32px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        letter-spacing: 0.02em;
+        position: relative;
     }
     
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .stTabs [aria-selected="true"]::before {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50%;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, #667eea, transparent);
+        border-radius: 2px;
     }
     
     .stTabs [aria-selected="false"] {
@@ -178,82 +309,129 @@ st.markdown("""
     .stTabs [aria-selected="false"]:hover {
         background: white;
         color: #475569;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
     
-    /* Enhanced Alert boxes */
-    .stAlert {
-        border-radius: 14px;
-        border: none;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-        padding: 1.25rem 1.5rem;
-    }
-    
-    /* Plotly chart container with better spacing */
+    /* Plotly Charts */
     .js-plotly-plot {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        margin: 2rem 0;
+        border: 1px solid #e2e8f0;
+    }
+    
+    /* Dataframe Modern */
+    [data-testid="stDataFrame"] {
         border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        margin: 1.5rem 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
     }
     
-    /* Dataframe styling */
-    [data-testid="stDataFrame"] {
-        border-radius: 14px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    /* Table Headers Gradient */
+    thead tr th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        font-weight: 700 !important;
+        padding: 1.25rem 1rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.85rem;
+        border: none !important;
     }
     
-    /* Sidebar section headers */
-    [data-testid="stSidebar"] h3 {
-        color: #1e293b;
-        font-weight: 700;
-        font-size: 1.1rem;
-        letter-spacing: -0.01em;
-        margin-bottom: 1rem;
+    tbody tr {
+        transition: all 0.2s ease;
     }
     
-    /* Sidebar text styling */
-    [data-testid="stSidebar"] .stMarkdown {
-        color: #475569;
-        font-size: 0.9rem;
-        line-height: 1.7;
+    tbody tr:hover {
+        background-color: #f8fafc !important;
+        transform: scale(1.01);
     }
     
-    /* Spinner styling */
-    .stSpinner > div {
-        border-color: #667eea transparent transparent transparent !important;
-    }
-    
-    /* Button hover effects */
-    button[data-testid="baseButton-secondary"] {
-        transition: all 0.3s ease;
-    }
-    
-    button[data-testid="baseButton-secondary"]:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    tbody td {
+        padding: 1rem !important;
+        border-bottom: 1px solid #f1f5f9 !important;
     }
     
     /* Column spacing */
     [data-testid="column"] {
-        padding: 0.5rem;
+        padding: 0.75rem;
     }
     
-    /* Improved table headers */
-    thead tr th {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        font-weight: 600 !important;
-        padding: 1rem !important;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-size: 0.85rem;
+    /* Spinner Modern */
+    .stSpinner > div {
+        border-color: #667eea transparent transparent transparent !important;
+        border-width: 4px !important;
     }
     
-    /* Table rows */
-    tbody tr:hover {
-        background-color: #f8fafc !important;
-        transition: all 0.2s ease;
+    /* Button enhancement */
+    .stButton > button {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        border: 2px solid #f1f5f9;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    /* Loading animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .card-container {
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    /* Badge styling in sidebar */
+    [data-testid="stSidebar"] ul {
+        list-style: none;
+        padding-left: 0;
+    }
+    
+    [data-testid="stSidebar"] li {
+        padding: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+    
+    [data-testid="stSidebar"] li::before {
+        content: '▸';
+        position: absolute;
+        left: 0;
+        color: #667eea;
+        font-weight: bold;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -271,8 +449,8 @@ def load_and_validate_metrics(komoditas_list_from_dataset):
         
         if csv_komoditas != dataset_komoditas:
             st.markdown("""
-            <div class="custom-alert alert-warning">
-                <strong>Dataset Berbeda Terdeteksi</strong><br><br>
+            <div class="alert-modern alert-warning">
+                <strong style="font-size: 1.1rem;">Dataset Berbeda Terdeteksi</strong><br><br>
                 Komoditas di file evaluasi: <strong>{}</strong> items<br>
                 Komoditas di dataset upload: <strong>{}</strong> items<br><br>
                 Sistem akan menghitung metrik evaluasi secara <strong>real-time</strong> berdasarkan dataset yang baru diupload.
@@ -281,8 +459,8 @@ def load_and_validate_metrics(komoditas_list_from_dataset):
             return None, "different_dataset"
         
         st.markdown("""
-        <div class="custom-alert alert-success">
-            <strong>Metrik Pre-computed Berhasil Dimuat</strong><br>
+        <div class="alert-modern alert-success">
+            <strong style="font-size: 1.1rem;">Metrik Pre-computed Berhasil Dimuat</strong><br>
             Menggunakan hasil evaluasi dari training 100 epochs optimal
         </div>
         """, unsafe_allow_html=True)
@@ -290,16 +468,16 @@ def load_and_validate_metrics(komoditas_list_from_dataset):
         
     except FileNotFoundError:
         st.markdown("""
-        <div class="custom-alert alert-info">
-            <strong>File Evaluasi Tidak Ditemukan</strong><br>
+        <div class="alert-modern alert-info">
+            <strong style="font-size: 1.1rem;">File Evaluasi Tidak Ditemukan</strong><br>
             Sistem akan menghitung metrik secara real-time dari dataset yang diupload
         </div>
         """, unsafe_allow_html=True)
         return None, "file_not_found"
     except Exception as e:
         st.markdown(f"""
-        <div class="custom-alert alert-warning">
-            <strong>Error Loading Evaluation File</strong><br>
+        <div class="alert-modern alert-warning">
+            <strong style="font-size: 1.1rem;">Error Loading Evaluation File</strong><br>
             {str(e)}<br><br>
             Menghitung metrik secara real-time...
         </div>
@@ -345,11 +523,11 @@ def calculate_metrics_realtime(model, data_normalized, scalers, komoditas_list, 
     return all_metrics
 
 # ===========================================================================================
-# SIDEBAR
+# SIDEBAR - DARK THEME
 # ===========================================================================================
 
 with st.sidebar:
-    st.markdown("### Informasi Model")
+    st.markdown("### INFORMASI MODEL")
     st.markdown("---")
     
     st.markdown("**Arsitektur Model**")
@@ -389,11 +567,15 @@ with st.sidebar:
     ui.badges(badge_list=[("Target MAPE < 10%", "destructive"), ("Early Stopping", "default")], key="performance_badges")
 
 # ===========================================================================================
-# MAIN CONTENT
+# MAIN CONTENT - HERO SECTION
 # ===========================================================================================
 
-st.markdown('<p class="title-text">Prediksi Harga Komoditas Pangan</p>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle-text">Sistem Prediksi Harga Menggunakan LSTM Neural Network</p>', unsafe_allow_html=True)
+st.markdown("""
+<div class="hero-section">
+    <p class="title-text">Prediksi Harga Komoditas Pangan</p>
+    <p class="subtitle-text">Sistem Prediksi Harga Menggunakan LSTM Neural Network</p>
+</div>
+""", unsafe_allow_html=True)
 
 # ===========================================================================================
 # UPLOAD DATASET
@@ -414,8 +596,8 @@ if uploaded_file is not None:
         komoditas_list = df_raw.iloc[:, 1].tolist()
         
         st.markdown(f"""
-        <div class="custom-alert alert-success">
-            <strong>Dataset Berhasil Dimuat</strong><br>
+        <div class="alert-modern alert-success">
+            <strong style="font-size: 1.1rem;">Dataset Berhasil Dimuat</strong><br><br>
             Total <strong>{len(komoditas_list)}</strong> komoditas dengan <strong>{df_raw.shape[1] - 2}</strong> data points
         </div>
         """, unsafe_allow_html=True)
@@ -559,15 +741,15 @@ if uploaded_file is not None:
                     # Info sumber metrik
                     if metric_source == "pre-computed (100 epochs optimal)":
                         st.markdown("""
-                        <div class="custom-alert alert-info">
-                            <strong>Sumber Metrik Evaluasi</strong><br>
+                        <div class="alert-modern alert-info">
+                            <strong style="font-size: 1.1rem;">Sumber Metrik Evaluasi</strong><br>
                             Menggunakan hasil pre-computed dari training 100 epochs (dataset original)
                         </div>
                         """, unsafe_allow_html=True)
                     else:
                         st.markdown("""
-                        <div class="custom-alert alert-warning">
-                            <strong>Sumber Metrik Evaluasi</strong><br>
+                        <div class="alert-modern alert-warning">
+                            <strong style="font-size: 1.1rem;">Sumber Metrik Evaluasi</strong><br>
                             Dihitung secara real-time dari dataset yang baru diupload
                         </div>
                         """, unsafe_allow_html=True)
@@ -608,13 +790,12 @@ if uploaded_file is not None:
                         )
                     
                     # ===========================================================================================
-                    # VISUALISASI - POSISI DITUKAR
+                    # VISUALISASI
                     # ===========================================================================================
                     
                     st.markdown("---")
                     st.markdown('<div class="section-header">Visualisasi Prediksi</div>', unsafe_allow_html=True)
                     
-                    # POSISI DITUKAR: Grafik Prediksi -> Evaluasi Detail -> Evaluasi Keseluruhan
                     tab1, tab2, tab3 = st.tabs(["Grafik Prediksi Harga", "Metrik Evaluasi Detail", "Metrik Evaluasi Keseluruhan"])
                     
                     with tab1:
@@ -629,37 +810,45 @@ if uploaded_file is not None:
                         fig1.add_trace(go.Scatter(
                             x=historical_dates, y=historical_prices,
                             mode='lines+markers', name='Data Historis',
-                            line=dict(color='#667eea', width=3), marker=dict(size=6)
+                            line=dict(color='#667eea', width=4), 
+                            marker=dict(size=8, line=dict(width=2, color='white'))
                         ))
                         
                         fig1.add_trace(go.Scatter(
                             x=future_dates, y=future_prices,
                             mode='lines+markers', name='Prediksi',
-                            line=dict(color='#f43f5e', width=3, dash='dash'), marker=dict(size=8, symbol='diamond')
+                            line=dict(color='#f43f5e', width=4, dash='dash'), 
+                            marker=dict(size=10, symbol='diamond', line=dict(width=2, color='white'))
                         ))
                         
                         fig1.add_trace(go.Scatter(
                             x=[target_date], y=[predicted_price],
                             mode='markers', name=f'Target ({selected_month} {selected_year})',
-                            marker=dict(size=18, color='#10b981', symbol='star', line=dict(width=2, color='white'))
+                            marker=dict(size=22, color='#10b981', symbol='star', line=dict(width=3, color='white'))
                         ))
                         
                         fig1.update_layout(
                             title=dict(text=f'Prediksi Harga {selected_commodity}',
-                                     font=dict(size=22, color='#1e293b', family='Inter', weight=700)),
+                                     font=dict(size=24, color='#1e293b', family='Inter', weight=800)),
                             xaxis_title='Tanggal', yaxis_title='Harga (Rp)',
-                            hovermode='x unified', template='plotly_white', height=600,
+                            hovermode='x unified', template='plotly_white', height=650,
                             showlegend=True, 
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
-                                      bgcolor="rgba(255,255,255,0.9)", bordercolor="#e2e8f0", borderwidth=1),
-                            margin=dict(t=80, b=80, l=80, r=80)
+                            legend=dict(
+                                orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
+                                bgcolor="rgba(255,255,255,0.95)", 
+                                bordercolor="#e2e8f0", 
+                                borderwidth=2,
+                                font=dict(size=12, weight=600)
+                            ),
+                            margin=dict(t=100, b=80, l=80, r=80),
+                            plot_bgcolor='rgba(248, 250, 252, 0.5)'
                         )
                         
                         st.plotly_chart(fig1, use_container_width=True)
                         
                         st.markdown(f"""
-                        <div class="custom-alert alert-info">
-                            <strong>Informasi Prediksi</strong><br><br>
+                        <div class="alert-modern alert-info">
+                            <strong style="font-size: 1.1rem;">Informasi Prediksi</strong><br><br>
                             <strong>Komoditas:</strong> {selected_commodity}<br>
                             <strong>Periode Target:</strong> {selected_month} {selected_year}<br>
                             <strong>Minggu Prediksi:</strong> {weeks_to_predict} minggu<br>
@@ -668,9 +857,8 @@ if uploaded_file is not None:
                         </div>
                         """, unsafe_allow_html=True)
                     
-                    # TAB 2 - METRIK EVALUASI DETAIL (DIPINDAH KE TENGAH)
                     with tab2:
-                        st.markdown(f"#### Evaluasi Metrik - {selected_commodity}")
+                        st.markdown(f"<h4 style='font-weight: 700; color: #1e293b;'>Evaluasi Metrik - {selected_commodity}</h4>", unsafe_allow_html=True)
                         st.markdown("")
                         
                         col_chart1, col_chart2 = st.columns(2)
@@ -682,19 +870,20 @@ if uploaded_file is not None:
                                 y=[rmse, mae],
                                 marker=dict(
                                     color=['#667eea', '#f43f5e'],
-                                    line=dict(color='white', width=2)
+                                    line=dict(color='white', width=3)
                                 ),
                                 text=[f'Rp {rmse:,.0f}', f'Rp {mae:,.0f}'],
                                 textposition='outside',
-                                textfont=dict(size=16, color='#1e293b', family='Inter', weight=700)
+                                textfont=dict(size=18, color='#1e293b', family='Inter', weight=800)
                             ))
                             fig3.update_layout(
-                                title=dict(text='RMSE & MAE', font=dict(size=18, weight=700)),
+                                title=dict(text='RMSE & MAE', font=dict(size=20, weight=800)),
                                 yaxis_title='Nilai (Rp)', 
                                 template='plotly_white', 
-                                height=500,
-                                margin=dict(t=80, b=80, l=80, r=80),
-                                showlegend=False
+                                height=550,
+                                margin=dict(t=100, b=80, l=80, r=80),
+                                showlegend=False,
+                                plot_bgcolor='rgba(248, 250, 252, 0.5)'
                             )
                             st.plotly_chart(fig3, use_container_width=True)
                         
@@ -705,11 +894,11 @@ if uploaded_file is not None:
                                 mode="gauge+number",
                                 value=mape,
                                 domain={'x': [0, 1], 'y': [0, 1]},
-                                title={'text': "MAPE (%)", 'font': {'size': 22, 'family': 'Inter', 'color': '#1e293b'}},
-                                number={'font': {'size': 48, 'family': 'Inter', 'color': mape_color}, 'suffix': '%'},
+                                title={'text': "MAPE (%)", 'font': {'size': 24, 'family': 'Inter', 'color': '#1e293b', 'weight': 800}},
+                                number={'font': {'size': 52, 'family': 'Inter', 'color': mape_color, 'weight': 900}, 'suffix': '%'},
                                 gauge={
-                                    'axis': {'range': [0, 30], 'tickwidth': 2, 'tickcolor': "#cbd5e1"},
-                                    'bar': {'color': mape_color, 'thickness': 0.8},
+                                    'axis': {'range': [0, 30], 'tickwidth': 3, 'tickcolor': "#cbd5e1"},
+                                    'bar': {'color': mape_color, 'thickness': 0.85},
                                     'steps': [
                                         {'range': [0, 5], 'color': '#d1fae5'},
                                         {'range': [5, 10], 'color': '#fef3c7'},
@@ -717,21 +906,21 @@ if uploaded_file is not None:
                                         {'range': [20, 30], 'color': '#fecaca'}
                                     ],
                                     'threshold': {
-                                        'line': {'color': "#1e293b", 'width': 5},
-                                        'thickness': 0.8,
+                                        'line': {'color': "#1e293b", 'width': 6},
+                                        'thickness': 0.85,
                                         'value': mape
                                     }
                                 }
                             ))
                             fig4.update_layout(
-                                height=500,
-                                margin=dict(t=80, b=80, l=80, r=80)
+                                height=550,
+                                margin=dict(t=100, b=80, l=80, r=80)
                             )
                             st.plotly_chart(fig4, use_container_width=True)
                         
                         st.markdown(f"""
-                        <div class="custom-alert alert-info">
-                            <strong>Status Performa - {selected_commodity}</strong><br><br>
+                        <div class="alert-modern alert-info">
+                            <strong style="font-size: 1.1rem;">Status Performa - {selected_commodity}</strong><br><br>
                             <strong>RMSE:</strong> Rp {rmse:,.2f}<br>
                             <strong>MAE:</strong> Rp {mae:,.2f}<br>
                             <strong>MAPE:</strong> {mape:.2f}%<br><br>
@@ -740,10 +929,9 @@ if uploaded_file is not None:
                         </div>
                         """, unsafe_allow_html=True)
                     
-                    # TAB 3 - METRIK EVALUASI KESELURUHAN (DIPINDAH KE KANAN)
                     with tab3:
-                        st.markdown(f"#### Evaluasi Performa Model untuk Semua Komoditas")
-                        st.markdown(f"*Sumber metrik: {metric_source}*")
+                        st.markdown(f"<h4 style='font-weight: 700; color: #1e293b;'>Evaluasi Performa Model untuk Semua Komoditas</h4>", unsafe_allow_html=True)
+                        st.markdown(f"<p style='color: #64748b; font-style: italic;'>Sumber metrik: {metric_source}</p>", unsafe_allow_html=True)
                         st.markdown("")
                         
                         if len(all_metrics) > 0:
@@ -758,20 +946,21 @@ if uploaded_file is not None:
                                     y=df_metrics['RMSE'],
                                     marker=dict(
                                         color='#667eea',
-                                        line=dict(color='white', width=1.5)
+                                        line=dict(color='white', width=2)
                                     ),
                                     text=df_metrics['RMSE'].apply(lambda x: f'Rp {x:,.0f}'),
                                     textposition='outside',
-                                    textfont=dict(size=9, family='Inter')
+                                    textfont=dict(size=9, family='Inter', weight=600)
                                 ))
                                 fig_rmse.update_layout(
-                                    title=dict(text='Root Mean Squared Error (RMSE)', font=dict(size=16, weight=700)),
+                                    title=dict(text='Root Mean Squared Error (RMSE)', font=dict(size=18, weight=800)),
                                     xaxis_title='Komoditas',
                                     yaxis_title='RMSE (Rp)',
-                                    height=580,
+                                    height=600,
                                     template='plotly_white',
-                                    xaxis={'tickangle': -45, 'tickfont': {'size': 8}},
-                                    margin=dict(t=80, b=160, l=80, r=40)
+                                    xaxis={'tickangle': -45, 'tickfont': {'size': 9}},
+                                    margin=dict(t=100, b=170, l=80, r=40),
+                                    plot_bgcolor='rgba(248, 250, 252, 0.5)'
                                 )
                                 st.plotly_chart(fig_rmse, use_container_width=True)
                             
@@ -782,24 +971,24 @@ if uploaded_file is not None:
                                     y=df_metrics['MAE'],
                                     marker=dict(
                                         color='#f43f5e',
-                                        line=dict(color='white', width=1.5)
+                                        line=dict(color='white', width=2)
                                     ),
                                     text=df_metrics['MAE'].apply(lambda x: f'Rp {x:,.0f}'),
                                     textposition='outside',
-                                    textfont=dict(size=9, family='Inter')
+                                    textfont=dict(size=9, family='Inter', weight=600)
                                 ))
                                 fig_mae.update_layout(
-                                    title=dict(text='Mean Absolute Error (MAE)', font=dict(size=16, weight=700)),
+                                    title=dict(text='Mean Absolute Error (MAE)', font=dict(size=18, weight=800)),
                                     xaxis_title='Komoditas',
                                     yaxis_title='MAE (Rp)',
-                                    height=580,
+                                    height=600,
                                     template='plotly_white',
-                                    xaxis={'tickangle': -45, 'tickfont': {'size': 8}},
-                                    margin=dict(t=80, b=160, l=80, r=40)
+                                    xaxis={'tickangle': -45, 'tickfont': {'size': 9}},
+                                    margin=dict(t=100, b=170, l=80, r=40),
+                                    plot_bgcolor='rgba(248, 250, 252, 0.5)'
                                 )
                                 st.plotly_chart(fig_mae, use_container_width=True)
                             
-                            # MAPE Chart
                             colors = []
                             for val in df_metrics['MAPE']:
                                 if val < 5:
@@ -817,30 +1006,30 @@ if uploaded_file is not None:
                                 y=df_metrics['MAPE'],
                                 marker=dict(
                                     color=colors,
-                                    line=dict(color='white', width=1.5)
+                                    line=dict(color='white', width=2)
                                 ),
                                 text=df_metrics['MAPE'].apply(lambda x: f'{x:.2f}%'),
                                 textposition='outside',
-                                textfont=dict(size=10, family='Inter', weight=600)
+                                textfont=dict(size=11, family='Inter', weight=700)
                             ))
                             fig_mape.update_layout(
-                                title=dict(text='Mean Absolute Percentage Error (MAPE)', font=dict(size=18, weight=700)),
+                                title=dict(text='Mean Absolute Percentage Error (MAPE)', font=dict(size=20, weight=800)),
                                 xaxis_title='Komoditas',
                                 yaxis_title='MAPE (%)',
-                                height=580,
+                                height=600,
                                 template='plotly_white',
                                 xaxis={'tickangle': -45, 'tickfont': {'size': 9}},
-                                margin=dict(t=80, b=160, l=80, r=80)
+                                margin=dict(t=100, b=170, l=80, r=80),
+                                plot_bgcolor='rgba(248, 250, 252, 0.5)'
                             )
                             st.plotly_chart(fig_mape, use_container_width=True)
                             
-                            # Performance Summary
                             excellent_count = len(df_metrics[df_metrics['MAPE'] < 5])
                             good_count = len(df_metrics[(df_metrics['MAPE'] >= 5) & (df_metrics['MAPE'] < 10)])
                             fair_count = len(df_metrics[(df_metrics['MAPE'] >= 10) & (df_metrics['MAPE'] < 20)])
                             poor_count = len(df_metrics[df_metrics['MAPE'] >= 20])
                             
-                            st.markdown("")
+                            st.markdown("<br>", unsafe_allow_html=True)
                             col_perf1, col_perf2, col_perf3, col_perf4 = st.columns(4)
                             
                             with col_perf1:
@@ -876,7 +1065,7 @@ if uploaded_file is not None:
                                 )
                             
                             st.markdown("---")
-                            st.markdown("#### Tabel Detail Metrik Evaluasi")
+                            st.markdown("<h4 style='font-weight: 700; color: #1e293b;'>Tabel Detail Metrik Evaluasi</h4>", unsafe_allow_html=True)
                             st.markdown("")
                             
                             df_display = df_metrics.copy()
@@ -884,7 +1073,7 @@ if uploaded_file is not None:
                             df_display['MAE'] = df_display['MAE'].apply(lambda x: f"Rp {x:,.2f}")
                             df_display['MAPE'] = df_display['MAPE'].apply(lambda x: f"{x:.2f}%")
                             
-                            st.dataframe(df_display, use_container_width=True, height=450)
+                            st.dataframe(df_display, use_container_width=True, height=500)
                         
                         else:
                             st.warning("Tidak cukup data test untuk evaluasi")
@@ -899,8 +1088,8 @@ if uploaded_file is not None:
 
 else:
     st.markdown("""
-    <div class="custom-alert alert-info">
-        <strong>Upload Dataset untuk Memulai</strong><br><br>
+    <div class="alert-modern alert-info">
+        <strong style="font-size: 1.1rem;">Upload Dataset untuk Memulai</strong><br><br>
         <strong>Format Dataset yang Diharapkan:</strong><br>
         <strong>Kolom 1:</strong> No (1, 2, 3, ...)<br>
         <strong>Kolom 2:</strong> Nama Komoditas<br>
@@ -913,8 +1102,8 @@ else:
 
 st.markdown("---")
 st.markdown("""
-<div style='text-align: center; color: #64748b; padding: 2rem 1rem;'>
-    <p style='font-size: 1rem; font-weight: 500; letter-spacing: 0.02em;'>Sistem Prediksi Harga Komoditas Pangan Menggunakan LSTM Neural Network</p>
-    <p style='font-size: 0.85rem; margin-top: 0.75rem; color: #94a3b8;'>Built with Streamlit & Shadcn UI</p>
+<div style='text-align: center; color: #64748b; padding: 3rem 1rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 20px; margin-top: 3rem;'>
+    <p style='font-size: 1.1rem; font-weight: 600; letter-spacing: 0.03em; margin-bottom: 0.75rem;'>Sistem Prediksi Harga Komoditas Pangan Menggunakan LSTM Neural Network</p>
+    <p style='font-size: 0.9rem; color: #94a3b8; font-weight: 500;'>Built with Streamlit & Shadcn UI • Tailwind CSS Design System</p>
 </div>
 """, unsafe_allow_html=True)
