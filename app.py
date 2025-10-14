@@ -115,6 +115,28 @@ st.markdown("""
     [data-testid="stHorizontalBlock"] {
         gap: 0.5rem !important;
     }
+    
+    /* Menghilangkan padding kosong di atas metrik */
+    .stVerticalBlock {
+        gap: 0rem !important;
+    }
+    
+    /* Mengurangi margin top untuk elemen setelah button prediksi */
+    div[data-testid="stVerticalBlock"] > div:has(+ div [data-testid="stMetric"]) {
+        margin-top: 0rem !important;
+        padding-top: 0rem !important;
+    }
+    
+    /* Menghilangkan spacing berlebih di sekitar metrik */
+    [data-testid="stMetric"] {
+        margin-top: 0rem !important;
+        padding-top: 0rem !important;
+    }
+    
+    /* Mengurangi jarak antara header dan konten */
+    .element-container {
+        margin-bottom: 0.5rem !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -408,7 +430,6 @@ if uploaded_file is not None:
                     # TAMPILKAN HASIL
                     # ===========================================================================================
                     
-                    st.markdown("---")
                     st.markdown("### Hasil Prediksi")
                     
                     # Info sumber metrik
@@ -489,8 +510,6 @@ if uploaded_file is not None:
                         )
                         
                         st.plotly_chart(fig1, use_container_width=True)
-                        
-                        # PERUBAHAN: Menghilangkan box informasi prediksi
                     
                     with tab2:
                         st.markdown(f"#### Evaluasi Performa Model untuk Semua Komoditas")
