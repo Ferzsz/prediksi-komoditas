@@ -21,26 +21,26 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS - Enhanced Modern Design
+# Custom CSS - Enhanced Modern & Elegant Design
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
     
     * {
         font-family: 'Inter', sans-serif;
     }
     
     .main .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        padding-left: 3rem;
-        padding-right: 3rem;
-        max-width: 1400px;
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+        padding-left: 4rem;
+        padding-right: 4rem;
+        max-width: 1600px;
     }
     
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
-        padding: 2rem 1rem;
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 2.5rem 1.5rem;
         border-right: 1px solid #e2e8f0;
     }
     
@@ -49,120 +49,211 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        font-size: 2.8rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        letter-spacing: -0.02em;
+        font-size: 3rem;
+        font-weight: 900;
+        margin-bottom: 0.75rem;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
     }
     
     .subtitle-text {
         color: #64748b;
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
+        font-size: 1.15rem;
+        margin-bottom: 2.5rem;
         font-weight: 400;
+        letter-spacing: -0.01em;
     }
     
     .section-header {
-        font-size: 1.5rem;
+        font-size: 1.75rem;
         font-weight: 700;
         color: #1e293b;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 3px solid #667eea;
-        display: inline-block;
+        margin-top: 2.5rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        padding-left: 1rem;
+        border-left: 5px solid #667eea;
+        letter-spacing: -0.02em;
     }
     
-    /* Custom alert boxes */
+    /* Custom alert boxes with better padding */
     .custom-alert {
-        padding: 1rem 1.5rem;
-        border-radius: 12px;
-        margin: 1rem 0;
-        border-left: 4px solid;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        padding: 1.25rem 1.75rem;
+        border-radius: 14px;
+        margin: 1.5rem 0;
+        border-left: 5px solid;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        font-size: 0.95rem;
+        line-height: 1.6;
     }
     
     .alert-success {
-        background-color: #d1fae5;
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
         border-color: #10b981;
         color: #065f46;
     }
     
     .alert-info {
-        background-color: #dbeafe;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
         border-color: #3b82f6;
         color: #1e40af;
     }
     
     .alert-warning {
-        background-color: #fef3c7;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
         border-color: #f59e0b;
         color: #92400e;
     }
     
     /* Streamlit native components enhancement */
     [data-testid="stMetricValue"] {
-        font-size: 2.2rem;
-        font-weight: 700;
+        font-size: 2.5rem;
+        font-weight: 800;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        letter-spacing: -0.02em;
     }
     
     [data-testid="stMetricLabel"] {
-        font-size: 0.95rem;
+        font-size: 1rem;
         color: #64748b;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.5rem;
     }
     
-    /* File uploader styling */
+    /* Enhanced metric delta */
+    [data-testid="stMetricDelta"] {
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    /* File uploader styling with better spacing */
     [data-testid="stFileUploader"] {
         background: white;
         border: 2px dashed #cbd5e1;
-        border-radius: 12px;
-        padding: 2rem;
+        border-radius: 16px;
+        padding: 3rem 2rem;
         transition: all 0.3s ease;
+        margin: 1.5rem 0;
     }
     
     [data-testid="stFileUploader"]:hover {
         border-color: #667eea;
         background: #f8fafc;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
     }
     
-    /* Tab styling */
+    /* Tab styling - Modern & Clean */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 12px;
         background-color: #f1f5f9;
-        border-radius: 12px;
-        padding: 4px;
+        border-radius: 14px;
+        padding: 8px;
+        margin-bottom: 2rem;
     }
     
     .stTabs [data-baseweb="tab"] {
-        border-radius: 8px;
-        padding: 12px 24px;
+        border-radius: 10px;
+        padding: 14px 28px;
         font-weight: 600;
+        font-size: 0.95rem;
         transition: all 0.3s ease;
+        letter-spacing: 0.01em;
     }
     
     .stTabs [aria-selected="true"] {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
     
-    /* Info boxes */
+    .stTabs [aria-selected="false"] {
+        background: transparent;
+        color: #64748b;
+    }
+    
+    .stTabs [aria-selected="false"]:hover {
+        background: white;
+        color: #475569;
+    }
+    
+    /* Enhanced Alert boxes */
     .stAlert {
-        border-radius: 12px;
+        border-radius: 14px;
         border: none;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        padding: 1.25rem 1.5rem;
     }
     
-    /* Plotly chart container */
+    /* Plotly chart container with better spacing */
     .js-plotly-plot {
-        border-radius: 12px;
+        border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        margin: 1.5rem 0;
+    }
+    
+    /* Dataframe styling */
+    [data-testid="stDataFrame"] {
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    
+    /* Sidebar section headers */
+    [data-testid="stSidebar"] h3 {
+        color: #1e293b;
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: -0.01em;
+        margin-bottom: 1rem;
+    }
+    
+    /* Sidebar text styling */
+    [data-testid="stSidebar"] .stMarkdown {
+        color: #475569;
+        font-size: 0.9rem;
+        line-height: 1.7;
+    }
+    
+    /* Spinner styling */
+    .stSpinner > div {
+        border-color: #667eea transparent transparent transparent !important;
+    }
+    
+    /* Button hover effects */
+    button[data-testid="baseButton-secondary"] {
+        transition: all 0.3s ease;
+    }
+    
+    button[data-testid="baseButton-secondary"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    }
+    
+    /* Column spacing */
+    [data-testid="column"] {
+        padding: 0.5rem;
+    }
+    
+    /* Improved table headers */
+    thead tr th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        padding: 1rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.85rem;
+    }
+    
+    /* Table rows */
+    tbody tr:hover {
+        background-color: #f8fafc !important;
+        transition: all 0.2s ease;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -181,9 +272,9 @@ def load_and_validate_metrics(komoditas_list_from_dataset):
         if csv_komoditas != dataset_komoditas:
             st.markdown("""
             <div class="custom-alert alert-warning">
-                <strong>⚠️ Dataset berbeda terdeteksi!</strong><br><br>
-                - Komoditas di file evaluasi: {} items<br>
-                - Komoditas di dataset upload: {} items<br><br>
+                <strong>Dataset Berbeda Terdeteksi</strong><br><br>
+                Komoditas di file evaluasi: <strong>{}</strong> items<br>
+                Komoditas di dataset upload: <strong>{}</strong> items<br><br>
                 Sistem akan menghitung metrik evaluasi secara <strong>real-time</strong> berdasarkan dataset yang baru diupload.
             </div>
             """.format(len(csv_komoditas), len(dataset_komoditas)), unsafe_allow_html=True)
@@ -191,7 +282,8 @@ def load_and_validate_metrics(komoditas_list_from_dataset):
         
         st.markdown("""
         <div class="custom-alert alert-success">
-            <strong>✅ Menggunakan metrik evaluasi pre-computed dari hasil training (100 epochs optimal)</strong>
+            <strong>Metrik Pre-computed Berhasil Dimuat</strong><br>
+            Menggunakan hasil evaluasi dari training 100 epochs optimal
         </div>
         """, unsafe_allow_html=True)
         return df_eval, "same_dataset"
@@ -199,14 +291,17 @@ def load_and_validate_metrics(komoditas_list_from_dataset):
     except FileNotFoundError:
         st.markdown("""
         <div class="custom-alert alert-info">
-            <strong>ℹ️ File evaluasi pre-computed tidak ditemukan. Menghitung metrik secara real-time...</strong>
+            <strong>File Evaluasi Tidak Ditemukan</strong><br>
+            Sistem akan menghitung metrik secara real-time dari dataset yang diupload
         </div>
         """, unsafe_allow_html=True)
         return None, "file_not_found"
     except Exception as e:
         st.markdown(f"""
         <div class="custom-alert alert-warning">
-            <strong>⚠️ Error loading evaluation file: {str(e)}. Menghitung metrik secara real-time...</strong>
+            <strong>Error Loading Evaluation File</strong><br>
+            {str(e)}<br><br>
+            Menghitung metrik secara real-time...
         </div>
         """, unsafe_allow_html=True)
         return None, "error"
@@ -250,14 +345,14 @@ def calculate_metrics_realtime(model, data_normalized, scalers, komoditas_list, 
     return all_metrics
 
 # ===========================================================================================
-# SIDEBAR - SHADCN UI ENHANCED
+# SIDEBAR
 # ===========================================================================================
 
 with st.sidebar:
-    st.markdown("### 📊 Informasi Model")
+    st.markdown("### Informasi Model")
     st.markdown("---")
     
-    st.markdown("**🏗️ Arsitektur Model**")
+    st.markdown("**Arsitektur Model**")
     ui.badges(badge_list=[("LSTM", "default"), ("Bidirectional", "secondary"), ("Dense", "outline")], key="arch_badges")
     st.markdown("""
     - Bidirectional LSTM (128 units)
@@ -267,7 +362,7 @@ with st.sidebar:
     """)
     
     st.markdown("---")
-    st.markdown("**⚙️ Hyperparameter**")
+    st.markdown("**Hyperparameter**")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -282,7 +377,7 @@ with st.sidebar:
     """)
     
     st.markdown("---")
-    st.markdown("**🔧 Preprocessing**")
+    st.markdown("**Preprocessing**")
     st.markdown("""
     - Time Steps: 20
     - Normalisasi: MinMaxScaler
@@ -297,15 +392,14 @@ with st.sidebar:
 # MAIN CONTENT
 # ===========================================================================================
 
-st.markdown('<p class="title-text">📈 Prediksi Harga Komoditas Pangan</p>', unsafe_allow_html=True)
+st.markdown('<p class="title-text">Prediksi Harga Komoditas Pangan</p>', unsafe_allow_html=True)
 st.markdown('<p class="subtitle-text">Sistem Prediksi Harga Menggunakan LSTM Neural Network</p>', unsafe_allow_html=True)
 
 # ===========================================================================================
-# UPLOAD DATASET - SHADCN UI
+# UPLOAD DATASET
 # ===========================================================================================
 
-st.markdown('<div class="section-header">📁 Upload Dataset</div>', unsafe_allow_html=True)
-st.markdown("")
+st.markdown('<div class="section-header">Upload Dataset</div>', unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader(
     "Pilih file dataset Excel (.xlsx)",
@@ -321,8 +415,8 @@ if uploaded_file is not None:
         
         st.markdown(f"""
         <div class="custom-alert alert-success">
-            <strong>✅ Dataset Berhasil Dimuat!</strong><br>
-            Total {len(komoditas_list)} komoditas dengan {df_raw.shape[1] - 2} data points
+            <strong>Dataset Berhasil Dimuat</strong><br>
+            Total <strong>{len(komoditas_list)}</strong> komoditas dengan <strong>{df_raw.shape[1] - 2}</strong> data points
         </div>
         """, unsafe_allow_html=True)
         
@@ -337,11 +431,10 @@ if uploaded_file is not None:
         st.markdown("---")
         
         # ===========================================================================================
-        # FORM PREDIKSI - SHADCN UI
+        # FORM PREDIKSI
         # ===========================================================================================
         
-        st.markdown('<div class="section-header">🎯 Prediksi Harga</div>', unsafe_allow_html=True)
-        st.markdown("")
+        st.markdown('<div class="section-header">Prediksi Harga</div>', unsafe_allow_html=True)
         
         col_form1, col_form2, col_form3 = st.columns(3)
         
@@ -369,13 +462,13 @@ if uploaded_file is not None:
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        predict_btn = ui.button(text="🚀 Prediksi Harga Sekarang", key="predict_button", variant="default")
+        predict_btn = ui.button(text="Prediksi Harga Sekarang", key="predict_button", variant="default")
         
         if predict_btn:
-            with st.spinner("🔄 Memproses prediksi..."):
+            with st.spinner("Memproses prediksi..."):
                 try:
                     # ===========================================================================================
-                    # PREPROCESSING - SEMUA KOMODITAS
+                    # PREPROCESSING
                     # ===========================================================================================
                     
                     df_data = df_raw.iloc[:, 2:]
@@ -457,24 +550,25 @@ if uploaded_file is not None:
                         rmse, mae, mape = 0, 0, 0
                     
                     # ===========================================================================================
-                    # TAMPILKAN HASIL - SHADCN UI
+                    # TAMPILKAN HASIL
                     # ===========================================================================================
                     
                     st.markdown("---")
-                    st.markdown('<div class="section-header">✨ Hasil Prediksi</div>', unsafe_allow_html=True)
-                    st.markdown("")
+                    st.markdown('<div class="section-header">Hasil Prediksi</div>', unsafe_allow_html=True)
                     
                     # Info sumber metrik
                     if metric_source == "pre-computed (100 epochs optimal)":
                         st.markdown("""
                         <div class="custom-alert alert-info">
-                            <strong>📊 Metrik Evaluasi:</strong> Menggunakan hasil pre-computed dari training 100 epochs (dataset original)
+                            <strong>Sumber Metrik Evaluasi</strong><br>
+                            Menggunakan hasil pre-computed dari training 100 epochs (dataset original)
                         </div>
                         """, unsafe_allow_html=True)
                     else:
                         st.markdown("""
                         <div class="custom-alert alert-warning">
-                            <strong>📊 Metrik Evaluasi:</strong> Dihitung secara real-time dari dataset yang baru diupload
+                            <strong>Sumber Metrik Evaluasi</strong><br>
+                            Dihitung secara real-time dari dataset yang baru diupload
                         </div>
                         """, unsafe_allow_html=True)
                     
@@ -482,7 +576,7 @@ if uploaded_file is not None:
                     
                     with col_result1:
                         ui.metric_card(
-                            title="💰 Harga Prediksi",
+                            title="Harga Prediksi",
                             content=f"Rp {predicted_price:,.0f}",
                             description=f"{selected_month} {selected_year}",
                             key="metric_prediction"
@@ -505,23 +599,23 @@ if uploaded_file is not None:
                         )
                     
                     with col_result4:
-                        mape_description = "🟢 Excellent" if mape < 5 else "🟡 Good" if mape < 10 else "🟠 Fair" if mape < 20 else "🔴 Poor"
+                        mape_status = "Excellent" if mape < 5 else "Good" if mape < 10 else "Fair" if mape < 20 else "Poor"
                         ui.metric_card(
                             title="MAPE",
                             content=f"{mape:.2f}%",
-                            description=mape_description,
+                            description=mape_status,
                             key="metric_mape"
                         )
                     
                     # ===========================================================================================
-                    # VISUALISASI
+                    # VISUALISASI - POSISI DITUKAR
                     # ===========================================================================================
                     
                     st.markdown("---")
-                    st.markdown('<div class="section-header">📊 Visualisasi Prediksi</div>', unsafe_allow_html=True)
-                    st.markdown("")
+                    st.markdown('<div class="section-header">Visualisasi Prediksi</div>', unsafe_allow_html=True)
                     
-                    tab1, tab2, tab3 = st.tabs(["📈 Grafik Prediksi Harga", "📊 Metrik Evaluasi Keseluruhan", "🎯 Metrik Evaluasi Detail"])
+                    # POSISI DITUKAR: Grafik Prediksi -> Evaluasi Detail -> Evaluasi Keseluruhan
+                    tab1, tab2, tab3 = st.tabs(["Grafik Prediksi Harga", "Metrik Evaluasi Detail", "Metrik Evaluasi Keseluruhan"])
                     
                     with tab1:
                         historical_dates = df_transposed['Tanggal'].tolist()
@@ -552,28 +646,105 @@ if uploaded_file is not None:
                         
                         fig1.update_layout(
                             title=dict(text=f'Prediksi Harga {selected_commodity}',
-                                     font=dict(size=22, color='#1e293b', family='Inter')),
+                                     font=dict(size=22, color='#1e293b', family='Inter', weight=700)),
                             xaxis_title='Tanggal', yaxis_title='Harga (Rp)',
-                            hovermode='x unified', template='plotly_white', height=550,
-                            showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                            hovermode='x unified', template='plotly_white', height=600,
+                            showlegend=True, 
+                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
+                                      bgcolor="rgba(255,255,255,0.9)", bordercolor="#e2e8f0", borderwidth=1),
+                            margin=dict(t=80, b=80, l=80, r=80)
                         )
                         
                         st.plotly_chart(fig1, use_container_width=True)
                         
                         st.markdown(f"""
                         <div class="custom-alert alert-info">
-                            <strong>📋 Informasi Prediksi:</strong><br>
-                            • <strong>Komoditas:</strong> {selected_commodity}<br>
-                            • <strong>Periode Target:</strong> {selected_month} {selected_year}<br>
-                            • <strong>Minggu Prediksi:</strong> {weeks_to_predict} minggu<br>
-                            • <strong>Tanggal Data Terakhir:</strong> {last_date.strftime('%d %B %Y')}<br>
-                            • <strong>Harga Prediksi:</strong> Rp {predicted_price:,.0f}
+                            <strong>Informasi Prediksi</strong><br><br>
+                            <strong>Komoditas:</strong> {selected_commodity}<br>
+                            <strong>Periode Target:</strong> {selected_month} {selected_year}<br>
+                            <strong>Minggu Prediksi:</strong> {weeks_to_predict} minggu<br>
+                            <strong>Tanggal Data Terakhir:</strong> {last_date.strftime('%d %B %Y')}<br>
+                            <strong>Harga Prediksi:</strong> Rp {predicted_price:,.0f}
                         </div>
                         """, unsafe_allow_html=True)
                     
+                    # TAB 2 - METRIK EVALUASI DETAIL (DIPINDAH KE TENGAH)
                     with tab2:
+                        st.markdown(f"#### Evaluasi Metrik - {selected_commodity}")
+                        st.markdown("")
+                        
+                        col_chart1, col_chart2 = st.columns(2)
+                        
+                        with col_chart1:
+                            fig3 = go.Figure()
+                            fig3.add_trace(go.Bar(
+                                x=['RMSE', 'MAE'], 
+                                y=[rmse, mae],
+                                marker=dict(
+                                    color=['#667eea', '#f43f5e'],
+                                    line=dict(color='white', width=2)
+                                ),
+                                text=[f'Rp {rmse:,.0f}', f'Rp {mae:,.0f}'],
+                                textposition='outside',
+                                textfont=dict(size=16, color='#1e293b', family='Inter', weight=700)
+                            ))
+                            fig3.update_layout(
+                                title=dict(text='RMSE & MAE', font=dict(size=18, weight=700)),
+                                yaxis_title='Nilai (Rp)', 
+                                template='plotly_white', 
+                                height=500,
+                                margin=dict(t=80, b=80, l=80, r=80),
+                                showlegend=False
+                            )
+                            st.plotly_chart(fig3, use_container_width=True)
+                        
+                        with col_chart2:
+                            mape_color = '#10b981' if mape < 5 else '#f59e0b' if mape < 10 else '#f97316' if mape < 20 else '#ef4444'
+                            
+                            fig4 = go.Figure(go.Indicator(
+                                mode="gauge+number",
+                                value=mape,
+                                domain={'x': [0, 1], 'y': [0, 1]},
+                                title={'text': "MAPE (%)", 'font': {'size': 22, 'family': 'Inter', 'color': '#1e293b'}},
+                                number={'font': {'size': 48, 'family': 'Inter', 'color': mape_color}, 'suffix': '%'},
+                                gauge={
+                                    'axis': {'range': [0, 30], 'tickwidth': 2, 'tickcolor': "#cbd5e1"},
+                                    'bar': {'color': mape_color, 'thickness': 0.8},
+                                    'steps': [
+                                        {'range': [0, 5], 'color': '#d1fae5'},
+                                        {'range': [5, 10], 'color': '#fef3c7'},
+                                        {'range': [10, 20], 'color': '#fed7aa'},
+                                        {'range': [20, 30], 'color': '#fecaca'}
+                                    ],
+                                    'threshold': {
+                                        'line': {'color': "#1e293b", 'width': 5},
+                                        'thickness': 0.8,
+                                        'value': mape
+                                    }
+                                }
+                            ))
+                            fig4.update_layout(
+                                height=500,
+                                margin=dict(t=80, b=80, l=80, r=80)
+                            )
+                            st.plotly_chart(fig4, use_container_width=True)
+                        
+                        st.markdown(f"""
+                        <div class="custom-alert alert-info">
+                            <strong>Status Performa - {selected_commodity}</strong><br><br>
+                            <strong>RMSE:</strong> Rp {rmse:,.2f}<br>
+                            <strong>MAE:</strong> Rp {mae:,.2f}<br>
+                            <strong>MAPE:</strong> {mape:.2f}%<br><br>
+                            <strong>Kategori Evaluasi:</strong> {mape_status}<br><br>
+                            <strong>Interpretasi:</strong> MAPE {mape:.2f}% berarti prediksi rata-rata meleset {mape:.2f}% dari nilai aktual
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    # TAB 3 - METRIK EVALUASI KESELURUHAN (DIPINDAH KE KANAN)
+                    with tab3:
                         st.markdown(f"#### Evaluasi Performa Model untuk Semua Komoditas")
                         st.markdown(f"*Sumber metrik: {metric_source}*")
+                        st.markdown("")
                         
                         if len(all_metrics) > 0:
                             df_metrics = pd.DataFrame(all_metrics)
@@ -585,19 +756,22 @@ if uploaded_file is not None:
                                 fig_rmse.add_trace(go.Bar(
                                     x=df_metrics['Komoditas'],
                                     y=df_metrics['RMSE'],
-                                    marker=dict(color='#667eea'),
+                                    marker=dict(
+                                        color='#667eea',
+                                        line=dict(color='white', width=1.5)
+                                    ),
                                     text=df_metrics['RMSE'].apply(lambda x: f'Rp {x:,.0f}'),
                                     textposition='outside',
-                                    textfont=dict(size=10)
+                                    textfont=dict(size=9, family='Inter')
                                 ))
                                 fig_rmse.update_layout(
-                                    title='Root Mean Squared Error (RMSE)',
+                                    title=dict(text='Root Mean Squared Error (RMSE)', font=dict(size=16, weight=700)),
                                     xaxis_title='Komoditas',
                                     yaxis_title='RMSE (Rp)',
-                                    height=550,
+                                    height=580,
                                     template='plotly_white',
-                                    xaxis={'tickangle': -45, 'tickfont': {'size': 9}},
-                                    margin=dict(t=80, b=150, l=80, r=40)
+                                    xaxis={'tickangle': -45, 'tickfont': {'size': 8}},
+                                    margin=dict(t=80, b=160, l=80, r=40)
                                 )
                                 st.plotly_chart(fig_rmse, use_container_width=True)
                             
@@ -606,19 +780,22 @@ if uploaded_file is not None:
                                 fig_mae.add_trace(go.Bar(
                                     x=df_metrics['Komoditas'],
                                     y=df_metrics['MAE'],
-                                    marker=dict(color='#f43f5e'),
+                                    marker=dict(
+                                        color='#f43f5e',
+                                        line=dict(color='white', width=1.5)
+                                    ),
                                     text=df_metrics['MAE'].apply(lambda x: f'Rp {x:,.0f}'),
                                     textposition='outside',
-                                    textfont=dict(size=10)
+                                    textfont=dict(size=9, family='Inter')
                                 ))
                                 fig_mae.update_layout(
-                                    title='Mean Absolute Error (MAE)',
+                                    title=dict(text='Mean Absolute Error (MAE)', font=dict(size=16, weight=700)),
                                     xaxis_title='Komoditas',
                                     yaxis_title='MAE (Rp)',
-                                    height=550,
+                                    height=580,
                                     template='plotly_white',
-                                    xaxis={'tickangle': -45, 'tickfont': {'size': 9}},
-                                    margin=dict(t=80, b=150, l=80, r=40)
+                                    xaxis={'tickangle': -45, 'tickfont': {'size': 8}},
+                                    margin=dict(t=80, b=160, l=80, r=40)
                                 )
                                 st.plotly_chart(fig_mae, use_container_width=True)
                             
@@ -638,19 +815,22 @@ if uploaded_file is not None:
                             fig_mape.add_trace(go.Bar(
                                 x=df_metrics['Komoditas'],
                                 y=df_metrics['MAPE'],
-                                marker=dict(color=colors),
+                                marker=dict(
+                                    color=colors,
+                                    line=dict(color='white', width=1.5)
+                                ),
                                 text=df_metrics['MAPE'].apply(lambda x: f'{x:.2f}%'),
                                 textposition='outside',
-                                textfont=dict(size=11, family='Inter')
+                                textfont=dict(size=10, family='Inter', weight=600)
                             ))
                             fig_mape.update_layout(
-                                title='Mean Absolute Percentage Error (MAPE)',
+                                title=dict(text='Mean Absolute Percentage Error (MAPE)', font=dict(size=18, weight=700)),
                                 xaxis_title='Komoditas',
                                 yaxis_title='MAPE (%)',
-                                height=550,
+                                height=580,
                                 template='plotly_white',
                                 xaxis={'tickangle': -45, 'tickfont': {'size': 9}},
-                                margin=dict(t=80, b=150, l=80, r=80)
+                                margin=dict(t=80, b=160, l=80, r=80)
                             )
                             st.plotly_chart(fig_mape, use_container_width=True)
                             
@@ -660,11 +840,12 @@ if uploaded_file is not None:
                             fair_count = len(df_metrics[(df_metrics['MAPE'] >= 10) & (df_metrics['MAPE'] < 20)])
                             poor_count = len(df_metrics[df_metrics['MAPE'] >= 20])
                             
+                            st.markdown("")
                             col_perf1, col_perf2, col_perf3, col_perf4 = st.columns(4)
                             
                             with col_perf1:
                                 ui.metric_card(
-                                    title="🟢 Excellent",
+                                    title="Excellent",
                                     content=str(excellent_count),
                                     description=f"{excellent_count/len(df_metrics)*100:.1f}%",
                                     key="perf_excellent"
@@ -672,7 +853,7 @@ if uploaded_file is not None:
                             
                             with col_perf2:
                                 ui.metric_card(
-                                    title="🟡 Good",
+                                    title="Good",
                                     content=str(good_count),
                                     description=f"{good_count/len(df_metrics)*100:.1f}%",
                                     key="perf_good"
@@ -680,7 +861,7 @@ if uploaded_file is not None:
                             
                             with col_perf3:
                                 ui.metric_card(
-                                    title="🟠 Fair",
+                                    title="Fair",
                                     content=str(fair_count),
                                     description=f"{fair_count/len(df_metrics)*100:.1f}%",
                                     key="perf_fair"
@@ -688,109 +869,43 @@ if uploaded_file is not None:
                             
                             with col_perf4:
                                 ui.metric_card(
-                                    title="🔴 Poor",
+                                    title="Poor",
                                     content=str(poor_count),
                                     description=f"{poor_count/len(df_metrics)*100:.1f}%",
                                     key="perf_poor"
                                 )
                             
                             st.markdown("---")
-                            st.markdown("#### 📋 Tabel Detail Metrik Evaluasi")
+                            st.markdown("#### Tabel Detail Metrik Evaluasi")
+                            st.markdown("")
                             
                             df_display = df_metrics.copy()
                             df_display['RMSE'] = df_display['RMSE'].apply(lambda x: f"Rp {x:,.2f}")
                             df_display['MAE'] = df_display['MAE'].apply(lambda x: f"Rp {x:,.2f}")
                             df_display['MAPE'] = df_display['MAPE'].apply(lambda x: f"{x:.2f}%")
                             
-                            st.dataframe(df_display, use_container_width=True, height=400)
+                            st.dataframe(df_display, use_container_width=True, height=450)
                         
                         else:
                             st.warning("Tidak cukup data test untuk evaluasi")
                     
-                    with tab3:
-                        st.markdown(f"#### Evaluasi Metrik - {selected_commodity}")
-                        
-                        col_chart1, col_chart2 = st.columns(2)
-                        
-                        with col_chart1:
-                            fig3 = go.Figure()
-                            fig3.add_trace(go.Bar(
-                                x=['RMSE', 'MAE'], 
-                                y=[rmse, mae],
-                                marker=dict(color=['#667eea', '#f43f5e']),
-                                text=[f'Rp {rmse:,.0f}', f'Rp {mae:,.0f}'],
-                                textposition='outside',
-                                textfont=dict(size=16, color='#1e293b', family='Inter')
-                            ))
-                            fig3.update_layout(
-                                title=dict(text='RMSE & MAE', font=dict(size=18)),
-                                yaxis_title='Nilai (Rp)', 
-                                template='plotly_white', 
-                                height=450,
-                                margin=dict(t=80, b=60, l=80, r=60),
-                                showlegend=False
-                            )
-                            st.plotly_chart(fig3, use_container_width=True)
-                        
-                        with col_chart2:
-                            mape_color = '#10b981' if mape < 5 else '#f59e0b' if mape < 10 else '#f97316' if mape < 20 else '#ef4444'
-                            
-                            fig4 = go.Figure(go.Indicator(
-                                mode="gauge+number",
-                                value=mape,
-                                domain={'x': [0, 1], 'y': [0, 1]},
-                                title={'text': "MAPE (%)", 'font': {'size': 20}},
-                                number={'font': {'size': 40}},
-                                gauge={
-                                    'axis': {'range': [0, 30], 'tickwidth': 1},
-                                    'bar': {'color': mape_color},
-                                    'steps': [
-                                        {'range': [0, 5], 'color': '#d1fae5'},
-                                        {'range': [5, 10], 'color': '#fef3c7'},
-                                        {'range': [10, 20], 'color': '#fed7aa'},
-                                        {'range': [20, 30], 'color': '#fecaca'}
-                                    ],
-                                    'threshold': {
-                                        'line': {'color': "#1e293b", 'width': 4},
-                                        'thickness': 0.75,
-                                        'value': mape
-                                    }
-                                }
-                            ))
-                            fig4.update_layout(
-                                height=450,
-                                margin=dict(t=80, b=60, l=60, r=60)
-                            )
-                            st.plotly_chart(fig4, use_container_width=True)
-                        
-                        st.markdown(f"""
-                        <div class="custom-alert alert-info">
-                            <strong>📊 Status Performa - {selected_commodity}:</strong><br><br>
-                            • <strong>RMSE:</strong> Rp {rmse:,.2f}<br>
-                            • <strong>MAE:</strong> Rp {mae:,.2f}<br>
-                            • <strong>MAPE:</strong> {mape:.2f}%<br><br>
-                            <strong>Evaluasi:</strong> {'🟢 Excellent' if mape < 5 else '🟡 Good' if mape < 10 else '🟠 Fair' if mape < 20 else '🔴 Poor'}<br><br>
-                            <strong>Interpretasi:</strong> MAPE {mape:.2f}% berarti prediksi rata-rata meleset {mape:.2f}% dari nilai aktual
-                        </div>
-                        """, unsafe_allow_html=True)
-                    
                 except Exception as e:
-                    st.error(f"❌ Error: {str(e)}")
+                    st.error(f"Error: {str(e)}")
                     import traceback
                     st.error(traceback.format_exc())
     
     except Exception as e:
-        st.error(f"❌ Error saat membaca dataset: {str(e)}")
+        st.error(f"Error saat membaca dataset: {str(e)}")
 
 else:
     st.markdown("""
     <div class="custom-alert alert-info">
-        <strong>📤 Silakan Upload Dataset</strong><br><br>
+        <strong>Upload Dataset untuk Memulai</strong><br><br>
         <strong>Format Dataset yang Diharapkan:</strong><br>
-        • <strong>Kolom 1:</strong> No (1, 2, 3, ...)<br>
-        • <strong>Kolom 2:</strong> Nama Komoditas<br>
-        • <strong>Kolom 3+:</strong> Data harga dengan header tanggal<br>
-        • <strong>File format:</strong> Excel (.xlsx)
+        <strong>Kolom 1:</strong> No (1, 2, 3, ...)<br>
+        <strong>Kolom 2:</strong> Nama Komoditas<br>
+        <strong>Kolom 3+:</strong> Data harga dengan header tanggal<br>
+        <strong>File format:</strong> Excel (.xlsx)
     </div>
     """, unsafe_allow_html=True)
     
@@ -798,8 +913,8 @@ else:
 
 st.markdown("---")
 st.markdown("""
-<div style='text-align: center; color: #64748b; padding: 1rem;'>
-    <p style='font-size: 0.9rem;'>⚡ Sistem Prediksi Harga Komoditas Pangan Menggunakan LSTM Neural Network</p>
-    <p style='font-size: 0.8rem; margin-top: 0.5rem;'>Built with Streamlit & Shadcn UI</p>
+<div style='text-align: center; color: #64748b; padding: 2rem 1rem;'>
+    <p style='font-size: 1rem; font-weight: 500; letter-spacing: 0.02em;'>Sistem Prediksi Harga Komoditas Pangan Menggunakan LSTM Neural Network</p>
+    <p style='font-size: 0.85rem; margin-top: 0.75rem; color: #94a3b8;'>Built with Streamlit & Shadcn UI</p>
 </div>
 """, unsafe_allow_html=True)
