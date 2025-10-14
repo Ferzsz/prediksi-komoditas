@@ -97,6 +97,8 @@ st.markdown("""
         font-size: 1rem;
         transition: all 0.3s ease;
         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        width: 100%;
+        margin-top: 1rem;
     }
     
     .stButton > button:hover {
@@ -128,6 +130,7 @@ st.markdown("""
         background-color: #f1f5f9;
         border-radius: 10px;
         padding: 6px;
+        margin-top: 1rem;
     }
     
     .stTabs [data-baseweb="tab"] {
@@ -361,8 +364,8 @@ if uploaded_file is not None:
                  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
             )
         
-        st.markdown("")
-        if st.button("Prediksi Harga Sekarang", type="primary", use_container_width=True):
+        # Button prediksi
+        if st.button("Prediksi Harga Sekarang", type="primary"):
             with st.spinner("Memproses prediksi..."):
                 try:
                     # ===========================================================================================
@@ -471,7 +474,6 @@ if uploaded_file is not None:
                     
                     st.markdown("---")
                     st.markdown("### Visualisasi Prediksi")
-                    st.markdown("")
                     
                     tab1, tab2, tab3 = st.tabs(["Grafik Prediksi Harga", "Metrik Evaluasi Detail", "Metrik Evaluasi Keseluruhan"])
                     
