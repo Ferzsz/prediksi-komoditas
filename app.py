@@ -20,214 +20,137 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS untuk styling
+# Custom CSS
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    
-    * {
-        font-family: 'Inter', sans-serif;
-    }
-    
     .main .block-container {
-        padding: 3rem 4rem;
-        max-width: 1600px;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        padding-left: 3rem;
+        padding-right: 3rem;
     }
     
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
-        padding: 2rem 1.5rem;
+        background-color: #f8f9fa;
+        padding: 2rem 1rem;
     }
     
-    [data-testid="stSidebar"] * {
-        color: #e0e7ff !important;
-    }
-    
-    [data-testid="stSidebar"] h3 {
-        color: #ffffff !important;
-        font-weight: 700;
-        font-size: 1.1rem;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    [data-testid="stSidebar"] hr {
-        border-color: rgba(255, 255, 255, 0.2);
-        margin: 1.5rem 0;
-    }
-    
-    [data-testid="stSidebar"] strong {
-        color: #ffffff !important;
-    }
-    
-    h1 {
-        color: #1e40af;
-        font-weight: 800;
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-        letter-spacing: -0.02em;
-    }
-    
-    h3 {
-        color: #1e40af;
-        font-weight: 700;
-        font-size: 1.5rem;
-        margin-top: 2.5rem;
-        margin-bottom: 1.5rem;
-        padding-left: 1rem;
-        border-left: 4px solid #3b82f6;
-    }
-    
-    h4 {
-        color: #1e40af;
-        font-weight: 600;
-        font-size: 1.2rem;
-        margin-top: 2rem;
+    .metric-card {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         margin-bottom: 1rem;
     }
     
-    .stButton > button {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        width: 100%;
-        margin-top: 1rem;
+    .title-text {
+        color: #2c3e50;
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
     }
     
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-        transform: translateY(-2px);
+    .subtitle-text {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stButton>button {
+        background-color: #3498db;
+        color: white;
+        border-radius: 8px;
+        padding: 0.5rem 2rem;
+        font-weight: 600;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .stButton>button:hover {
+        background-color: #2980b9;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .info-box {
+        background-color: #e8f4f8;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+        margin-bottom: 1rem;
+    }
+    
+    .success-box {
+        background-color: #d4edda;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #28a745;
+        margin-bottom: 1rem;
+    }
+    
+    .warning-box {
+        background-color: #fff3cd;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #ffc107;
+        margin-bottom: 1rem;
     }
     
     [data-testid="stMetricValue"] {
         font-size: 2rem;
-        font-weight: 700;
-        color: #1e40af;
+        font-weight: bold;
+        color: #2c3e50;
     }
     
     [data-testid="stMetricLabel"] {
-        font-size: 0.9rem;
-        color: #64748b;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-    
-    [data-testid="stMetricDelta"] {
-        font-size: 0.85rem;
-    }
-    
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: #f1f5f9;
-        border-radius: 10px;
-        padding: 6px;
-        margin-top: 1rem;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 8px;
-        padding: 12px 24px;
-        font-weight: 600;
-        color: #64748b;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white !important;
-    }
-    
-    .stAlert {
-        padding: 1.25rem 1.5rem;
-        border-radius: 10px;
-        border: none;
-        margin: 1.5rem 0;
-    }
-    
-    [data-testid="stFileUploader"] {
-        padding: 2.5rem 2rem;
-        border: 2px dashed #cbd5e1;
-        border-radius: 10px;
-        background-color: #f8fafc;
-    }
-    
-    .stSelectbox > div > div {
-        border-radius: 8px;
-        border: 2px solid #e2e8f0;
-        padding: 0.5rem 1rem;
-        background-color: white;
-    }
-    
-    .stDataFrame {
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-    }
-    
-    thead tr th {
-        background-color: #3b82f6 !important;
-        color: white !important;
-        font-weight: 600 !important;
-        padding: 1rem !important;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        letter-spacing: 0.05em;
-    }
-    
-    tbody tr:hover {
-        background-color: #f8fafc !important;
-    }
-    
-    .js-plotly-plot {
-        border-radius: 10px;
-        border: 1px solid #e2e8f0;
-    }
-    
-    div[data-testid="column"] {
-        padding: 0.5rem;
-    }
-    
-    hr {
-        margin: 2rem 0;
-        border-color: #e2e8f0;
+        font-size: 1rem;
+        color: #7f8c8d;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # ===========================================================================================
-# FUNGSI HELPER
+# FUNGSI UNTUK LOAD DAN VALIDASI METRIK
 # ===========================================================================================
 
 def load_and_validate_metrics(komoditas_list_from_dataset):
-    """Load pre-computed metrics dan validasi dataset"""
+    """
+    Load pre-computed metrics dan validasi apakah cocok dengan dataset yang di-upload
+    Jika tidak cocok, akan return None untuk menghitung ulang secara real-time
+    """
     try:
         df_eval = pd.read_csv('hasil_evaluasi_lstm_100epochs.csv')
+        
+        # Validasi: Cek apakah komoditas di CSV sama dengan dataset yang di-upload
         csv_komoditas = set(df_eval['Komoditas'].tolist())
         dataset_komoditas = set(komoditas_list_from_dataset)
         
+        # Jika komoditas di CSV dan dataset TIDAK sama persis, return None
         if csv_komoditas != dataset_komoditas:
-            st.warning("Dataset berbeda terdeteksi. Menghitung metrik secara real-time...")
+            st.warning(f"""
+            ⚠️ **Dataset berbeda terdeteksi!**
+            
+            - Komoditas di file evaluasi: {len(csv_komoditas)} items
+            - Komoditas di dataset upload: {len(dataset_komoditas)} items
+            
+            Sistem akan menghitung metrik evaluasi secara **real-time** berdasarkan dataset yang baru diupload.
+            """)
             return None, "different_dataset"
         
-        st.success("Menggunakan metrik pre-computed dari training 100 epochs")
+        # Jika sama, gunakan metrik dari CSV
+        st.info("✅ Menggunakan metrik evaluasi pre-computed dari hasil training (100 epochs optimal)")
         return df_eval, "same_dataset"
         
     except FileNotFoundError:
-        st.info("File evaluasi tidak ditemukan. Menghitung metrik secara real-time...")
+        st.info("ℹ️ File evaluasi pre-computed tidak ditemukan. Menghitung metrik secara real-time...")
         return None, "file_not_found"
     except Exception as e:
-        st.warning(f"Error: {str(e)}. Menghitung metrik secara real-time...")
+        st.warning(f"⚠️ Error loading evaluation file: {str(e)}. Menghitung metrik secara real-time...")
         return None, "error"
 
 def calculate_metrics_realtime(model, data_normalized, scalers, komoditas_list, TIME_STEPS=20):
-    """Hitung metrik evaluasi secara real-time"""
+    """
+    Hitung metrik evaluasi secara real-time dari dataset yang di-upload
+    """
     split_idx = int(len(data_normalized) * 0.90)
     test_data = data_normalized[split_idx:]
     
@@ -300,9 +223,9 @@ with st.sidebar:
     """)
     
     st.markdown("---")
-    st.markdown("**Target Performa**")
+    st.markdown("**Performa Model**")
     st.markdown("""
-    - MAPE Target: < 10%
+    - Target MAPE: < 10%
     - Early Stopping: Patience 20
     - ReduceLR: Patience 8
     """)
@@ -311,19 +234,20 @@ with st.sidebar:
 # MAIN CONTENT
 # ===========================================================================================
 
-st.title("Prediksi Harga Komoditas Pangan")
-st.markdown("Sistem Prediksi Harga Menggunakan LSTM Neural Network")
-st.markdown("---")
+st.markdown('<p class="title-text">Prediksi Harga Komoditas Pangan</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle-text">Sistem Prediksi Harga Menggunakan LSTM Neural Network</p>', unsafe_allow_html=True)
 
 # ===========================================================================================
 # UPLOAD DATASET
 # ===========================================================================================
 
 st.markdown("### Upload Dataset")
+st.markdown("Upload file Excel (.xlsx) yang berisi data harga komoditas historis")
+
 uploaded_file = st.file_uploader(
-    "Pilih file dataset Excel (.xlsx)",
+    "Pilih file dataset",
     type=['xlsx'],
-    help="Format: Kolom 1 = No, Kolom 2 = Komoditas, Kolom 3+ = Data harga"
+    help="Format: Kolom 1 = No, Kolom 2 = Komoditas, Kolom 3+ = Data harga dengan header tanggal"
 )
 
 if uploaded_file is not None:
@@ -332,13 +256,15 @@ if uploaded_file is not None:
         df_raw = pd.read_excel(uploaded_file)
         komoditas_list = df_raw.iloc[:, 1].tolist()
         
-        st.success(f"Dataset berhasil dimuat: {len(komoditas_list)} komoditas, {df_raw.shape[1] - 2} data points")
+        st.markdown('<div class="success-box">Dataset berhasil dimuat</div>', unsafe_allow_html=True)
         
-        st.markdown("")
         col1, col2, col3 = st.columns(3)
-        col1.metric("Total Komoditas", len(komoditas_list))
-        col2.metric("Data Points", df_raw.shape[1] - 2)
-        col3.metric("Rentang Waktu", f"{df_raw.shape[1] - 2} minggu")
+        with col1:
+            st.metric("Total Komoditas", len(komoditas_list))
+        with col2:
+            st.metric("Total Data Points", df_raw.shape[1] - 2)
+        with col3:
+            st.metric("Rentang Waktu", f"{df_raw.shape[1] - 2} minggu")
         
         st.markdown("---")
         
@@ -347,49 +273,63 @@ if uploaded_file is not None:
         # ===========================================================================================
         
         st.markdown("### Prediksi Harga")
-        st.markdown("")
         
         col_form1, col_form2, col_form3 = st.columns(3)
         
         with col_form1:
-            selected_commodity = st.selectbox("Pilih Komoditas", komoditas_list)
+            selected_commodity = st.selectbox(
+                "Pilih Komoditas",
+                options=komoditas_list,
+                help="Pilih komoditas yang ingin diprediksi"
+            )
         
         with col_form2:
-            selected_year = st.selectbox("Pilih Tahun", [2025, 2026])
+            selected_year = st.selectbox(
+                "Pilih Tahun",
+                options=[2025, 2026],
+                help="Pilih tahun untuk prediksi"
+            )
         
         with col_form3:
             selected_month = st.selectbox(
                 "Pilih Bulan",
-                ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+                options=['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                help="Pilih bulan untuk prediksi"
             )
         
-        # Button prediksi
-        if st.button("Prediksi Harga Sekarang", type="primary"):
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if st.button("Prediksi Harga", use_container_width=True):
             with st.spinner("Memproses prediksi..."):
                 try:
                     # ===========================================================================================
-                    # PREPROCESSING
+                    # PREPROCESSING - SEMUA KOMODITAS
                     # ===========================================================================================
                     
+                    # Transpose data
                     df_data = df_raw.iloc[:, 2:]
                     df_transposed = df_data.T
                     df_transposed.columns = komoditas_list
                     df_transposed.reset_index(inplace=True)
                     df_transposed.rename(columns={'index': 'Tanggal'}, inplace=True)
                     
+                    # Convert tanggal
                     df_transposed['Tanggal'] = pd.to_datetime(df_transposed['Tanggal'], format='%d/ %m/ %Y', errors='coerce')
                     df_transposed = df_transposed.dropna(subset=['Tanggal'])
                     df_transposed = df_transposed.sort_values('Tanggal').reset_index(drop=True)
                     
+                    # Konversi ke numeric
                     for kolom in komoditas_list:
                         if df_transposed[kolom].dtype == 'object':
                             df_transposed[kolom] = df_transposed[kolom].str.replace(',', '').str.replace('"', '')
                         df_transposed[kolom] = pd.to_numeric(df_transposed[kolom], errors='coerce')
                     
+                    # Interpolasi
                     df_transposed[komoditas_list] = df_transposed[komoditas_list].interpolate(method='linear', limit_direction='both')
                     df_transposed[komoditas_list] = df_transposed[komoditas_list].fillna(method='bfill').fillna(method='ffill')
                     
+                    # Normalisasi SEMUA komoditas
                     scalers = {}
                     data_normalized = np.zeros((len(df_transposed), len(komoditas_list)))
                     
@@ -414,14 +354,17 @@ if uploaded_file is not None:
                     
                     TIME_STEPS = 20
                     predictions = []
+                    
                     current_sequence = data_normalized[-TIME_STEPS:].reshape(1, TIME_STEPS, len(komoditas_list))
                     
                     for _ in range(weeks_to_predict):
                         pred = model.predict(current_sequence, verbose=0)
                         predictions.append(pred[0])
+                        
                         new_pred = pred.reshape(1, 1, len(komoditas_list))
                         current_sequence = np.append(current_sequence[:, 1:, :], new_pred, axis=1)
                     
+                    # Ambil prediksi untuk komoditas yang dipilih
                     commodity_idx = komoditas_list.index(selected_commodity)
                     predicted_price_norm = predictions[-1][commodity_idx]
                     predicted_price = scalers[selected_commodity].inverse_transform([[predicted_price_norm]])[0, 0]
@@ -433,10 +376,16 @@ if uploaded_file is not None:
                     df_eval_metrics, status = load_and_validate_metrics(komoditas_list)
                     
                     if df_eval_metrics is not None and status == "same_dataset":
+                        # Gunakan metrik dari CSV (dataset sama)
                         all_metrics = df_eval_metrics.rename(columns={'MAPE (%)': 'MAPE'}).to_dict('records')
+                        metric_source = "pre-computed (100 epochs optimal)"
                     else:
-                        all_metrics = calculate_metrics_realtime(model, data_normalized, scalers, komoditas_list, TIME_STEPS)
+                        # Hitung metrik secara real-time (dataset berbeda atau file tidak ada)
+                        with st.spinner("Menghitung metrik evaluasi untuk dataset baru..."):
+                            all_metrics = calculate_metrics_realtime(model, data_normalized, scalers, komoditas_list, TIME_STEPS)
+                        metric_source = "real-time calculation"
                     
+                    # Ambil metrik untuk komoditas yang dipilih
                     if len(all_metrics) > 0:
                         selected_metrics = [m for m in all_metrics if m['Komoditas'] == selected_commodity][0]
                         rmse = selected_metrics['RMSE']
@@ -451,22 +400,38 @@ if uploaded_file is not None:
                     
                     st.markdown("---")
                     st.markdown("### Hasil Prediksi")
-                    st.markdown("")
+                    
+                    # Info sumber metrik
+                    if metric_source == "pre-computed (100 epochs optimal)":
+                        st.markdown('<div class="info-box">📊 <strong>Metrik Evaluasi:</strong> Menggunakan hasil pre-computed dari training 100 epochs (dataset original)</div>', unsafe_allow_html=True)
+                    else:
+                        st.markdown('<div class="warning-box">📊 <strong>Metrik Evaluasi:</strong> Dihitung secara real-time dari dataset yang baru diupload</div>', unsafe_allow_html=True)
                     
                     col_result1, col_result2, col_result3, col_result4 = st.columns(4)
                     
                     with col_result1:
-                        st.metric("Harga Prediksi", f"Rp {predicted_price:,.0f}", f"{selected_month} {selected_year}")
+                        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                        st.metric(
+                            label="Harga Prediksi",
+                            value=f"Rp {predicted_price:,.0f}",
+                            help="Prediksi harga untuk bulan yang dipilih"
+                        )
+                        st.markdown('</div>', unsafe_allow_html=True)
                     
                     with col_result2:
-                        st.metric("RMSE", f"Rp {rmse:,.0f}", "Root Mean Squared Error")
+                        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                        st.metric(label="RMSE", value=f"Rp {rmse:,.0f}", help="Root Mean Squared Error")
+                        st.markdown('</div>', unsafe_allow_html=True)
                     
                     with col_result3:
-                        st.metric("MAE", f"Rp {mae:,.0f}", "Mean Absolute Error")
+                        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                        st.metric(label="MAE", value=f"Rp {mae:,.0f}", help="Mean Absolute Error")
+                        st.markdown('</div>', unsafe_allow_html=True)
                     
                     with col_result4:
-                        mape_status = "Excellent" if mape < 5 else "Good" if mape < 10 else "Fair" if mape < 20 else "Poor"
-                        st.metric("MAPE", f"{mape:.2f}%", mape_status)
+                        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                        st.metric(label="MAPE", value=f"{mape:.2f}%", help="Mean Absolute Percentage Error")
+                        st.markdown('</div>', unsafe_allow_html=True)
                     
                     # ===========================================================================================
                     # VISUALISASI
@@ -475,10 +440,9 @@ if uploaded_file is not None:
                     st.markdown("---")
                     st.markdown("### Visualisasi Prediksi")
                     
-                    tab1, tab2, tab3 = st.tabs(["Grafik Prediksi Harga", "Metrik Evaluasi Detail", "Metrik Evaluasi Keseluruhan"])
+                    tab1, tab2, tab3 = st.tabs(["Grafik Prediksi Harga", "Grafik Metrik Evaluasi Keseluruhan", "Grafik Metrik Evaluasi"])
                     
                     with tab1:
-                        st.markdown("")
                         historical_dates = df_transposed['Tanggal'].tolist()
                         historical_prices = df_transposed[selected_commodity].tolist()
                         
@@ -490,173 +454,126 @@ if uploaded_file is not None:
                         fig1.add_trace(go.Scatter(
                             x=historical_dates, y=historical_prices,
                             mode='lines+markers', name='Data Historis',
-                            line=dict(color='#3b82f6', width=3), 
-                            marker=dict(size=6, color='#3b82f6')
+                            line=dict(color='#2E86AB', width=3), marker=dict(size=6)
                         ))
                         
                         fig1.add_trace(go.Scatter(
                             x=future_dates, y=future_prices,
                             mode='lines+markers', name='Prediksi',
-                            line=dict(color='#ef4444', width=3, dash='dash'), 
-                            marker=dict(size=8, symbol='diamond', color='#ef4444')
+                            line=dict(color='#E63946', width=3, dash='dash'), marker=dict(size=8, symbol='square')
                         ))
                         
                         fig1.add_trace(go.Scatter(
                             x=[target_date], y=[predicted_price],
                             mode='markers', name=f'Target ({selected_month} {selected_year})',
-                            marker=dict(size=16, color='#10b981', symbol='star')
+                            marker=dict(size=15, color='#27ae60', symbol='star')
                         ))
                         
                         fig1.update_layout(
-                            title=dict(text=f'Prediksi Harga {selected_commodity}', font=dict(size=18, color='#1e40af', family='Inter')),
-                            xaxis_title='Tanggal', 
-                            yaxis_title='Harga (Rp)',
-                            hovermode='x unified', 
-                            template='plotly_white', 
-                            height=550,
-                            showlegend=True,
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                            margin=dict(t=80, b=60, l=60, r=60)
+                            title=dict(text=f'Prediksi Harga {selected_commodity}',
+                                     font=dict(size=20, color='#2c3e50', family='Arial Black')),
+                            xaxis_title='Tanggal', yaxis_title='Harga (Rp)',
+                            hovermode='x unified', template='plotly_white', height=500,
+                            showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
                         )
                         
                         st.plotly_chart(fig1, use_container_width=True)
                         
-                        st.markdown("")
-                        st.info(f"""
-                        **Informasi Prediksi:**
-                        - Komoditas: {selected_commodity}
-                        - Periode Target: {selected_month} {selected_year}
-                        - Minggu Prediksi: {weeks_to_predict} minggu
-                        - Tanggal Data Terakhir: {last_date.strftime('%d %B %Y')}
-                        - Harga Prediksi: Rp {predicted_price:,.0f}
-                        """)
+                        st.markdown(f"""
+                        <div class="info-box">
+                            <strong>Informasi Prediksi:</strong><br>
+                            Komoditas: {selected_commodity}<br>
+                            Periode Target: {selected_month} {selected_year}<br>
+                            Minggu Prediksi: {weeks_to_predict} minggu<br>
+                            Tanggal Data Terakhir: {last_date.strftime('%d %B %Y')}
+                        </div>
+                        """, unsafe_allow_html=True)
                     
                     with tab2:
-                        st.markdown("")
-                        st.markdown(f"#### Evaluasi Metrik - {selected_commodity}")
-                        st.markdown("")
-                        
-                        col_chart1, col_chart2 = st.columns(2)
-                        
-                        with col_chart1:
-                            fig3 = go.Figure()
-                            fig3.add_trace(go.Bar(
-                                x=['RMSE', 'MAE'], 
-                                y=[rmse, mae],
-                                marker=dict(color=['#3b82f6', '#ef4444']),
-                                text=[f'Rp {rmse:,.0f}', f'Rp {mae:,.0f}'],
-                                textposition='outside',
-                                textfont=dict(size=14, family='Inter')
-                            ))
-                            fig3.update_layout(
-                                title=dict(text='RMSE & MAE', font=dict(size=16)),
-                                yaxis_title='Nilai (Rp)', 
-                                template='plotly_white', 
-                                height=480,
-                                showlegend=False,
-                                margin=dict(t=60, b=60, l=60, r=60)
-                            )
-                            st.plotly_chart(fig3, use_container_width=True)
-                        
-                        with col_chart2:
-                            mape_color = '#10b981' if mape < 5 else '#f59e0b' if mape < 10 else '#f97316' if mape < 20 else '#ef4444'
-                            
-                            fig4 = go.Figure(go.Indicator(
-                                mode="gauge+number",
-                                value=mape,
-                                title={'text': "MAPE (%)", 'font': {'size': 18, 'family': 'Inter'}},
-                                number={'font': {'size': 40}},
-                                gauge={
-                                    'axis': {'range': [0, 30], 'tickwidth': 2},
-                                    'bar': {'color': mape_color},
-                                    'steps': [
-                                        {'range': [0, 5], 'color': '#d1fae5'},
-                                        {'range': [5, 10], 'color': '#fef3c7'},
-                                        {'range': [10, 20], 'color': '#fed7aa'},
-                                        {'range': [20, 30], 'color': '#fecaca'}
-                                    ],
-                                    'threshold': {
-                                        'line': {'color': "#1e293b", 'width': 4},
-                                        'thickness': 0.75,
-                                        'value': mape
-                                    }
-                                }
-                            ))
-                            fig4.update_layout(height=480, margin=dict(t=60, b=60, l=60, r=60))
-                            st.plotly_chart(fig4, use_container_width=True)
-                        
-                        st.markdown("")
-                        st.info(f"""
-                        **Status Performa - {selected_commodity}:**
-                        - RMSE: Rp {rmse:,.2f}
-                        - MAE: Rp {mae:,.2f}
-                        - MAPE: {mape:.2f}%
-                        - Kategori: {mape_status}
-                        - Interpretasi: MAPE {mape:.2f}% berarti prediksi rata-rata meleset {mape:.2f}% dari nilai aktual
-                        """)
-                    
-                    with tab3:
-                        st.markdown("")
-                        st.markdown("#### Evaluasi Performa Model untuk Semua Komoditas")
-                        st.markdown("")
+                        st.markdown(f"#### Evaluasi Performa Model untuk Semua Komoditas")
+                        st.markdown(f"*Sumber metrik: {metric_source}*")
                         
                         if len(all_metrics) > 0:
                             df_metrics = pd.DataFrame(all_metrics)
                             
+                            # Visualisasi metrik keseluruhan
                             col1, col2 = st.columns(2)
                             
                             with col1:
+                                # Grafik RMSE untuk semua komoditas
                                 fig_rmse = go.Figure()
                                 fig_rmse.add_trace(go.Bar(
                                     x=df_metrics['Komoditas'],
                                     y=df_metrics['RMSE'],
-                                    marker=dict(color='#3b82f6'),
+                                    marker=dict(color='#3498db'),
                                     text=df_metrics['RMSE'].apply(lambda x: f'Rp {x:,.0f}'),
                                     textposition='outside',
-                                    textfont=dict(size=9)
+                                    textfont=dict(size=10)
                                 ))
                                 fig_rmse.update_layout(
-                                    title=dict(text='Root Mean Squared Error (RMSE)', font=dict(size=15)),
+                                    title='Root Mean Squared Error (RMSE) - Semua Komoditas',
                                     xaxis_title='Komoditas',
                                     yaxis_title='RMSE (Rp)',
                                     height=550,
                                     template='plotly_white',
-                                    xaxis={'tickangle': -45, 'tickfont': {'size': 8}},
-                                    margin=dict(t=70, b=140, l=70, r=30)
+                                    xaxis={'tickangle': -45, 'tickfont': {'size': 9}},
+                                    margin=dict(t=80, b=150, l=80, r=40)
                                 )
                                 st.plotly_chart(fig_rmse, use_container_width=True)
+                                
+                                # Indikator RMSE
+                                st.markdown("""
+                                **Interpretasi RMSE:**
+                                - Semakin **rendah** semakin baik
+                                - Mengukur rata-rata kesalahan prediksi
+                                - Sensitif terhadap outlier
+                                - Satuan: Rupiah (Rp)
+                                - **Score bagus:** Relatif terhadap rentang harga
+                                """)
                             
                             with col2:
+                                # Grafik MAE untuk semua komoditas
                                 fig_mae = go.Figure()
                                 fig_mae.add_trace(go.Bar(
                                     x=df_metrics['Komoditas'],
                                     y=df_metrics['MAE'],
-                                    marker=dict(color='#ef4444'),
+                                    marker=dict(color='#e74c3c'),
                                     text=df_metrics['MAE'].apply(lambda x: f'Rp {x:,.0f}'),
                                     textposition='outside',
-                                    textfont=dict(size=9)
+                                    textfont=dict(size=10)
                                 ))
                                 fig_mae.update_layout(
-                                    title=dict(text='Mean Absolute Error (MAE)', font=dict(size=15)),
+                                    title='Mean Absolute Error (MAE) - Semua Komoditas',
                                     xaxis_title='Komoditas',
                                     yaxis_title='MAE (Rp)',
                                     height=550,
                                     template='plotly_white',
-                                    xaxis={'tickangle': -45, 'tickfont': {'size': 8}},
-                                    margin=dict(t=70, b=140, l=70, r=30)
+                                    xaxis={'tickangle': -45, 'tickfont': {'size': 9}},
+                                    margin=dict(t=80, b=150, l=80, r=40)
                                 )
                                 st.plotly_chart(fig_mae, use_container_width=True)
+                                
+                                # Indikator MAE
+                                st.markdown("""
+                                **Interpretasi MAE:**
+                                - Semakin **rendah** semakin baik
+                                - Lebih mudah diinterpretasi
+                                - Kurang sensitif terhadap outlier
+                                - Satuan: Rupiah (Rp)
+                                - **Score bagus:** MAE < 5% dari nilai rata-rata
+                                """)
                             
+                            # Grafik MAPE - Full width
                             colors = []
                             for val in df_metrics['MAPE']:
                                 if val < 5:
-                                    colors.append('#10b981')
+                                    colors.append('#27ae60')
                                 elif val < 10:
-                                    colors.append('#f59e0b')
+                                    colors.append('#f39c12')
                                 elif val < 20:
-                                    colors.append('#f97316')
+                                    colors.append('#e67e22')
                                 else:
-                                    colors.append('#ef4444')
+                                    colors.append('#c0392b')
                             
                             fig_mape = go.Figure()
                             fig_mape.add_trace(go.Bar(
@@ -665,43 +582,132 @@ if uploaded_file is not None:
                                 marker=dict(color=colors),
                                 text=df_metrics['MAPE'].apply(lambda x: f'{x:.2f}%'),
                                 textposition='outside',
-                                textfont=dict(size=10)
+                                textfont=dict(size=11, family='Arial Black')
                             ))
                             fig_mape.update_layout(
-                                title=dict(text='Mean Absolute Percentage Error (MAPE)', font=dict(size=16)),
+                                title='Mean Absolute Percentage Error (MAPE) - Semua Komoditas',
                                 xaxis_title='Komoditas',
                                 yaxis_title='MAPE (%)',
                                 height=550,
                                 template='plotly_white',
                                 xaxis={'tickangle': -45, 'tickfont': {'size': 9}},
-                                margin=dict(t=70, b=140, l=70, r=70)
+                                margin=dict(t=80, b=150, l=80, r=80)
                             )
                             st.plotly_chart(fig_mape, use_container_width=True)
                             
+                            # Indikator MAPE
+                            st.markdown("""
+                            **Interpretasi MAPE & Indikator Score yang Bagus:**
+                            
+                            | Kategori | Range MAPE | Kualitas Model | Interpretasi |
+                            |----------|------------|----------------|--------------|
+                            | 🟢 **Excellent** | **< 5%** | Model sangat akurat | Error rata-rata < 5% |
+                            | 🟡 **Good** | **5% - 10%** | Model akurat | Error dapat diterima |
+                            | 🟠 **Fair** | **10% - 20%** | Model cukup baik | Perlu monitoring |
+                            | 🔴 **Poor** | **> 20%** | Model perlu perbaikan | Error terlalu besar |
+                            
+                            **Catatan:**
+                            - Target ideal: MAPE < 10%
+                            - MAPE < 5% = performa luar biasa
+                            - Nilai mendekati 0% = prediksi hampir sempurna
+                            """)
+                            
+                            # Ringkasan performa
                             excellent_count = len(df_metrics[df_metrics['MAPE'] < 5])
                             good_count = len(df_metrics[(df_metrics['MAPE'] >= 5) & (df_metrics['MAPE'] < 10)])
                             fair_count = len(df_metrics[(df_metrics['MAPE'] >= 10) & (df_metrics['MAPE'] < 20)])
                             poor_count = len(df_metrics[df_metrics['MAPE'] >= 20])
                             
-                            st.markdown("")
-                            col_perf1, col_perf2, col_perf3, col_perf4 = st.columns(4)
-                            col_perf1.metric("Excellent", excellent_count, f"{excellent_count/len(df_metrics)*100:.1f}%")
-                            col_perf2.metric("Good", good_count, f"{good_count/len(df_metrics)*100:.1f}%")
-                            col_perf3.metric("Fair", fair_count, f"{fair_count/len(df_metrics)*100:.1f}%")
-                            col_perf4.metric("Poor", poor_count, f"{poor_count/len(df_metrics)*100:.1f}%")
+                            st.markdown(f"""
+                            **Ringkasan Performa Model:**
+                            - 🟢 Excellent: **{excellent_count}** ({excellent_count/len(df_metrics)*100:.1f}%)
+                            - 🟡 Good: **{good_count}** ({good_count/len(df_metrics)*100:.1f}%)
+                            - 🟠 Fair: **{fair_count}** ({fair_count/len(df_metrics)*100:.1f}%)
+                            - 🔴 Poor: **{poor_count}** ({poor_count/len(df_metrics)*100:.1f}%)
                             
+                            **Kesimpulan:** {'Model sangat baik!' if (excellent_count + good_count) / len(df_metrics) >= 0.8 else 'Model baik, beberapa perlu optimasi' if (excellent_count + good_count) / len(df_metrics) >= 0.6 else 'Model perlu perbaikan signifikan'}
+                            """)
+                            
+                            # Tabel metrik
                             st.markdown("---")
                             st.markdown("#### Tabel Detail Metrik Evaluasi")
-                            st.markdown("")
                             
                             df_display = df_metrics.copy()
                             df_display['RMSE'] = df_display['RMSE'].apply(lambda x: f"Rp {x:,.2f}")
                             df_display['MAE'] = df_display['MAE'].apply(lambda x: f"Rp {x:,.2f}")
                             df_display['MAPE'] = df_display['MAPE'].apply(lambda x: f"{x:.2f}%")
                             
-                            st.dataframe(df_display, use_container_width=True, height=450)
+                            st.dataframe(df_display, use_container_width=True, height=400)
+                            
                         else:
                             st.warning("Tidak cukup data test untuk evaluasi")
+                    
+                    with tab3:
+                        st.markdown(f"#### Evaluasi Metrik - {selected_commodity}")
+                        
+                        col_chart1, col_chart2 = st.columns(2)
+                        
+                        with col_chart1:
+                            fig3 = go.Figure()
+                            fig3.add_trace(go.Bar(
+                                x=['RMSE', 'MAE'], 
+                                y=[rmse, mae],
+                                marker=dict(color=['#3498db', '#e74c3c']),
+                                text=[f'Rp {rmse:,.0f}', f'Rp {mae:,.0f}'],
+                                textposition='outside',
+                                textfont=dict(size=16, color='#2c3e50', family='Arial Black')
+                            ))
+                            fig3.update_layout(
+                                title=dict(text='RMSE & MAE', font=dict(size=18)),
+                                yaxis_title='Nilai (Rp)', 
+                                template='plotly_white', 
+                                height=450,
+                                margin=dict(t=80, b=60, l=80, r=60),
+                                showlegend=False
+                            )
+                            st.plotly_chart(fig3, use_container_width=True)
+                        
+                        with col_chart2:
+                            mape_color = '#27ae60' if mape < 5 else '#f39c12' if mape < 10 else '#e67e22' if mape < 20 else '#c0392b'
+                            
+                            fig4 = go.Figure(go.Indicator(
+                                mode="gauge+number",
+                                value=mape,
+                                domain={'x': [0, 1], 'y': [0, 1]},
+                                title={'text': "MAPE (%)", 'font': {'size': 20}},
+                                number={'font': {'size': 40}},
+                                gauge={
+                                    'axis': {'range': [0, 30], 'tickwidth': 1},
+                                    'bar': {'color': mape_color},
+                                    'steps': [
+                                        {'range': [0, 5], 'color': '#d5f4e6'},
+                                        {'range': [5, 10], 'color': '#fcf3cf'},
+                                        {'range': [10, 20], 'color': '#fae5d3'},
+                                        {'range': [20, 30], 'color': '#fadbd8'}
+                                    ],
+                                    'threshold': {
+                                        'line': {'color': "black", 'width': 4},
+                                        'thickness': 0.75,
+                                        'value': mape
+                                    }
+                                }
+                            ))
+                            fig4.update_layout(
+                                height=450,
+                                margin=dict(t=80, b=60, l=60, r=60)
+                            )
+                            st.plotly_chart(fig4, use_container_width=True)
+                        
+                        st.markdown(f"""
+                        **Status Performa - {selected_commodity}:**
+                        - **RMSE:** Rp {rmse:,.2f}
+                        - **MAE:** Rp {mae:,.2f}
+                        - **MAPE:** {mape:.2f}%
+                        
+                        **Evaluasi:** {'🟢 Excellent' if mape < 5 else '🟡 Good' if mape < 10 else '🟠 Fair' if mape < 20 else '🔴 Poor'}
+                        
+                        **Interpretasi:** MAPE {mape:.2f}% berarti prediksi rata-rata meleset {mape:.2f}% dari nilai aktual
+                        """)
                     
                 except Exception as e:
                     st.error(f"Error: {str(e)}")
@@ -712,19 +718,18 @@ if uploaded_file is not None:
         st.error(f"Error saat membaca dataset: {str(e)}")
 
 else:
-    st.info("""
-    **Silakan upload dataset untuk memulai**
-    
-    Format Dataset yang Diharapkan:
-    - Kolom 1: No (1, 2, 3, ...)
-    - Kolom 2: Nama Komoditas
-    - Kolom 3+: Data harga dengan header tanggal
-    - File format: Excel (.xlsx)
+    st.markdown('<div class="info-box">Silakan upload dataset untuk memulai prediksi</div>', unsafe_allow_html=True)
+    st.markdown("#### Format Dataset yang Diharapkan:")
+    st.markdown("""
+    - **Kolom 1**: No (1, 2, 3, ...)
+    - **Kolom 2**: Nama Komoditas
+    - **Kolom 3+**: Data harga dengan header tanggal
+    - **File format**: Excel (.xlsx)
     """)
 
 st.markdown("---")
 st.markdown("""
-<div style='text-align: center; color: #64748b; padding: 2rem;'>
-    <p style='font-size: 0.95rem; margin: 0;'>Sistem Prediksi Harga Komoditas Pangan Menggunakan LSTM Neural Network</p>
+<div style='text-align: center; color: #7f8c8d; padding: 1rem;'>
+    <p>Sistem Prediksi Harga Komoditas Pangan Menggunakan LSTM Neural Network</p>
 </div>
 """, unsafe_allow_html=True)
