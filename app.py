@@ -6,7 +6,7 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import load_model
 import warnings
 from datetime import datetime
-import pickle
+import os
 
 warnings.filterwarnings('ignore')
 
@@ -161,14 +161,6 @@ st.markdown("""
         padding: 0.5rem;
     }
     
-    /* Upload area */
-    .uploadedFile {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 4px;
-        border: 2px dashed #cccccc;
-    }
-    
     /* Metric container */
     [data-testid="metric-container"] {
         background-color: #f8f9fa;
@@ -184,6 +176,49 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# =====================================================================
+# FUNGSI LOAD FILES LOKAL
+# =====================================================================
+@st.cache_resource
+def load_trained_model(model_path='best_lstm_model.h5'):
+    """Load model yang sudah di-train dari file lokal"""
+    try:
+        if os.path.exists(model_path):
+            model = load_model(model_path)
+            return model
+        else:
+            st.error(f"File model tidak ditemukan: {model_path}")
+            return None
+    except Exception as e:
+        st.error(f"Gagal memuat model: {str(e)}")
+        return None
+
+@st.cache_data
+def load_dataset(dataset_path='dataset.xlsx'):
+    """Load dataset dari file lokal"""
+    try:
+        if os.path.exists(dataset_path):
+            df = pd.read_excel(dataset_path)
+            return df
+        else:
+            st.error(f"File dataset tidak ditemukan: {dataset_path}")
+            return None
+    except Exception as e:
+        st.error(f"Gagal memuat dataset: {str(e)}")
+        return None
+
+@st.cache_data
+def load_evaluation_results(eval_path='hasil_evaluasi_lstm_100epochs.csv'):
+    """Load hasil evaluasi dari file lokal"""
+    try:
+        if os.path.exists(eval_path):
+            df = pd.read_csv(eval_path)
+            return df
+        else:
+            return None
+    except Exception as e:
+        return None
 
 # =====================================================================
 # FUNGSI PREPROCESSING
@@ -228,19 +263,6 @@ def preprocess_data(df_raw):
     except Exception as e:
         st.error(f"Terjadi kesalahan dalam preprocessing: {str(e)}")
         return None, None
-
-# =====================================================================
-# FUNGSI LOAD MODEL DAN SCALER
-# =====================================================================
-@st.cache_resource
-def load_trained_model(model_file):
-    """Load model yang sudah di-train dari file .h5"""
-    try:
-        model = load_model(model_file)
-        return model
-    except Exception as e:
-        st.error(f"Gagal memuat model: {str(e)}")
-        return None
 
 def create_scalers(df_processed, komoditas_list):
     """Membuat scaler untuk setiap komoditas"""
@@ -306,28 +328,29 @@ def prepare_last_sequence(df_processed, komoditas_list, scalers, time_steps=20):
 st.sidebar.markdown("### Model Prediksi Harga Pangan")
 st.sidebar.markdown("---")
 
-# Upload model
-uploaded_model = st.sidebar.file_uploader(
-    "Upload Model (.h5)",
-    type=['h5'],
-    help="Upload file model best_lstm_model.h5"
-)
-
-# Upload dataset
-uploaded_dataset = st.sidebar.file_uploader(
-    "Upload Dataset Excel",
-    type=['xlsx', 'xls'],
-    help="Upload file Excel dengan format yang sama dengan dataset training"
-)
-
-st.sidebar.markdown("---")
 st.sidebar.markdown("""
-**Format Dataset:**
-- Kolom 1: Nomor urut
-- Kolom 2: Nama Komoditas
-- Kolom 3 dst: Tanggal dengan harga
-- Format tanggal: DD/ MM/ YYYY
+**Status File:**
 """)
+
+# Cek keberadaan file
+model_exists = os.path.exists('best_lstm_model.h5')
+dataset_exists = os.path.exists('dataset.xlsx')
+eval_exists = os.path.exists('hasil_evaluasi_lstm_100epochs.csv')
+
+if model_exists:
+    st.sidebar.success("✓ Model tersedia")
+else:
+    st.sidebar.error("✗ Model tidak ditemukan")
+
+if dataset_exists:
+    st.sidebar.success("✓ Dataset tersedia")
+else:
+    st.sidebar.error("✗ Dataset tidak ditemukan")
+
+if eval_exists:
+    st.sidebar.success("✓ File evaluasi tersedia")
+else:
+    st.sidebar.info("○ File evaluasi opsional")
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("""
@@ -336,6 +359,15 @@ st.sidebar.markdown("""
 - Time Steps: 20
 - Trained Epochs: 100
 - Optimizer: Adam
+- Loss: Huber
+""")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("""
+**File yang Diperlukan:**
+- best_lstm_model.h5
+- dataset.xlsx
+- hasil_evaluasi_lstm_100epochs.csv (opsional)
 """)
 
 # =====================================================================
@@ -344,353 +376,350 @@ st.sidebar.markdown("""
 st.markdown('<h1 class="main-header">Model Prediksi Harga Pangan Indonesia 2025-2026</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Sistem Prediksi Harga Multi-Komoditas Menggunakan Long Short-Term Memory (LSTM)</p>', unsafe_allow_html=True)
 
-# Cek apakah model dan dataset sudah diupload
-if uploaded_model is not None and uploaded_dataset is not None:
+# Load files dari direktori lokal
+if model_exists and dataset_exists:
     try:
         # Load model
-        with st.spinner('Memuat model...'):
-            model = load_trained_model(uploaded_model)
+        with st.spinner('Memuat model dari direktori...'):
+            model = load_trained_model()
         
         if model is not None:
             st.markdown('<div class="success-box">Model berhasil dimuat dari file best_lstm_model.h5</div>', unsafe_allow_html=True)
             
             # Load dataset
-            df_raw = pd.read_excel(uploaded_dataset)
-            st.markdown('<div class="success-box">Dataset berhasil diupload dan siap diproses</div>', unsafe_allow_html=True)
+            with st.spinner('Memuat dataset dari direktori...'):
+                df_raw = load_dataset()
             
-            # Preprocessing
-            with st.spinner('Memproses dataset...'):
-                df_processed, komoditas_list = preprocess_data(df_raw)
-            
-            if df_processed is not None and komoditas_list is not None:
-                # Buat scalers
-                scalers = create_scalers(df_processed, komoditas_list)
+            if df_raw is not None:
+                st.markdown('<div class="success-box">Dataset berhasil dimuat dari file dataset.xlsx</div>', unsafe_allow_html=True)
                 
-                # Simpan ke session state
-                if 'model' not in st.session_state:
-                    st.session_state['model'] = model
-                    st.session_state['scalers'] = scalers
-                    st.session_state['komoditas_list'] = komoditas_list
-                    st.session_state['df_processed'] = df_processed
+                # Preprocessing
+                with st.spinner('Memproses dataset...'):
+                    df_processed, komoditas_list = preprocess_data(df_raw)
                 
-                # Tampilkan info dataset
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    st.markdown(f"""
-                    <div class="metric-card">
-                        <h3>Total Data</h3>
-                        <h2>{len(df_processed)}</h2>
-                        <p>Baris Data</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                
-                with col2:
-                    st.markdown(f"""
-                    <div class="metric-card">
-                        <h3>Jumlah Komoditas</h3>
-                        <h2>{len(komoditas_list)}</h2>
-                        <p>Jenis Komoditas</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                
-                with col3:
-                    st.markdown(f"""
-                    <div class="metric-card">
-                        <h3>Periode Data</h3>
-                        <h2>{df_processed['Tanggal'].min().strftime('%Y')}-{df_processed['Tanggal'].max().strftime('%Y')}</h2>
-                        <p>Rentang Waktu</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                
-                st.markdown("---")
-                
-                # Tab untuk evaluasi dan prediksi
-                tab1, tab2 = st.tabs(["Evaluasi Model", "Prediksi Harga Masa Depan"])
-                
-                # =====================================================================
-                # TAB 1: EVALUASI MODEL
-                # =====================================================================
-                with tab1:
-                    st.markdown("### Hasil Evaluasi Model")
-                    st.markdown('<div class="info-box">Berikut adalah hasil evaluasi performa model LSTM yang telah dilatih menggunakan data historis</div>', unsafe_allow_html=True)
+                if df_processed is not None and komoditas_list is not None:
+                    # Buat scalers
+                    scalers = create_scalers(df_processed, komoditas_list)
                     
-                    # Load hasil evaluasi dari CSV (jika ada)
-                    try:
-                        # Cek apakah ada file hasil evaluasi
-                        df_eval = pd.read_csv('hasil_evaluasi_lstm_100epochs.csv')
-                        
-                        st.markdown("#### Tabel Evaluasi Metrik per Komoditas")
-                        st.dataframe(df_eval, use_container_width=True, height=400)
-                        
-                        # Statistik
-                        st.markdown("#### Ringkasan Statistik Evaluasi")
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.metric("Rata-rata MAPE", f"{df_eval['MAPE (%)'].mean():.2f}%")
-                        with col2:
-                            st.metric("Rata-rata MAE", f"Rp {df_eval['MAE'].mean():,.0f}")
-                        with col3:
-                            st.metric("Rata-rata RMSE", f"Rp {df_eval['RMSE'].mean():,.0f}")
-                        
-                        # Visualisasi
-                        st.markdown("---")
-                        st.markdown("#### Visualisasi Metrik Evaluasi")
-                        
-                        col1, col2 = st.columns(2)
-                        
-                        with col1:
-                            # Grafik MAPE
-                            df_sorted = df_eval.sort_values('MAPE (%)')
-                            fig_mape = go.Figure()
-                            fig_mape.add_trace(go.Bar(
-                                x=df_sorted['MAPE (%)'].head(10),
-                                y=df_sorted['Komoditas'].head(10),
-                                orientation='h',
-                                marker=dict(color='#2c3e50')
-                            ))
-                            fig_mape.update_layout(
-                                title='Top 10 Komoditas - MAPE Terbaik',
-                                xaxis_title='MAPE (%)',
-                                yaxis_title='Komoditas',
-                                height=400,
-                                template='plotly_white',
-                                plot_bgcolor='white',
-                                paper_bgcolor='white'
-                            )
-                            st.plotly_chart(fig_mape, use_container_width=True)
-                        
-                        with col2:
-                            # Grafik MAE
-                            df_sorted_mae = df_eval.sort_values('MAE')
-                            fig_mae = go.Figure()
-                            fig_mae.add_trace(go.Bar(
-                                x=df_sorted_mae['MAE'].head(10),
-                                y=df_sorted_mae['Komoditas'].head(10),
-                                orientation='h',
-                                marker=dict(color='#34495e')
-                            ))
-                            fig_mae.update_layout(
-                                title='Top 10 Komoditas - MAE Terbaik',
-                                xaxis_title='MAE (Rp)',
-                                yaxis_title='Komoditas',
-                                height=400,
-                                template='plotly_white',
-                                plot_bgcolor='white',
-                                paper_bgcolor='white'
-                            )
-                            st.plotly_chart(fig_mae, use_container_width=True)
-                        
-                    except:
-                        st.markdown('<div class="info-box">File hasil evaluasi tidak ditemukan. Silakan upload file hasil_evaluasi_lstm_100epochs.csv untuk melihat metrik evaluasi detail.</div>', unsafe_allow_html=True)
-                
-                # =====================================================================
-                # TAB 2: PREDIKSI MASA DEPAN
-                # =====================================================================
-                with tab2:
-                    st.markdown("### Prediksi Harga Komoditas Masa Depan")
-                    st.markdown('<div class="info-box">Pilih bulan dan tahun yang ingin diprediksi, kemudian klik tombol "Mulai Prediksi" untuk melihat hasil prediksi harga seluruh komoditas</div>', unsafe_allow_html=True)
-                    
-                    col1, col2 = st.columns(2)
+                    # Tampilkan info dataset
+                    col1, col2, col3 = st.columns(3)
                     
                     with col1:
-                        bulan_options = {
-                            'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4,
-                            'Mei': 5, 'Juni': 6, 'Juli': 7, 'Agustus': 8,
-                            'September': 9, 'Oktober': 10, 'November': 11, 'Desember': 12
-                        }
-                        bulan_selected = st.selectbox("Pilih Bulan", list(bulan_options.keys()))
+                        st.markdown(f"""
+                        <div class="metric-card">
+                            <h3>Total Data</h3>
+                            <h2>{len(df_processed)}</h2>
+                            <p>Baris Data</p>
+                        </div>
+                        """, unsafe_allow_html=True)
                     
                     with col2:
-                        tahun_selected = st.selectbox("Pilih Tahun", [2025, 2026, 2027])
+                        st.markdown(f"""
+                        <div class="metric-card">
+                            <h3>Jumlah Komoditas</h3>
+                            <h2>{len(komoditas_list)}</h2>
+                            <p>Jenis Komoditas</p>
+                        </div>
+                        """, unsafe_allow_html=True)
                     
-                    if st.button("Mulai Prediksi", key="predict_btn"):
-                        bulan_target = datetime(tahun_selected, bulan_options[bulan_selected], 15)
+                    with col3:
+                        st.markdown(f"""
+                        <div class="metric-card">
+                            <h3>Periode Data</h3>
+                            <h2>{df_processed['Tanggal'].min().strftime('%Y')}-{df_processed['Tanggal'].max().strftime('%Y')}</h2>
+                            <p>Rentang Waktu</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    st.markdown("---")
+                    
+                    # Tab untuk evaluasi dan prediksi
+                    tab1, tab2 = st.tabs(["Evaluasi Model", "Prediksi Harga Masa Depan"])
+                    
+                    # =====================================================================
+                    # TAB 1: EVALUASI MODEL
+                    # =====================================================================
+                    with tab1:
+                        st.markdown("### Hasil Evaluasi Model")
+                        st.markdown('<div class="info-box">Berikut adalah hasil evaluasi performa model LSTM yang telah dilatih menggunakan data historis harga pangan</div>', unsafe_allow_html=True)
                         
-                        # Siapkan sequence terakhir
-                        last_sequence = prepare_last_sequence(df_processed, komoditas_list, scalers)
+                        # Load hasil evaluasi
+                        df_eval = load_evaluation_results()
                         
-                        with st.spinner(f'Memprediksi harga untuk {bulan_selected} {tahun_selected}...'):
-                            predictions = predict_future(
-                                model,
-                                last_sequence,
-                                scalers,
-                                komoditas_list,
-                                bulan_target
-                            )
+                        if df_eval is not None:
+                            st.markdown("#### Tabel Evaluasi Metrik per Komoditas")
+                            
+                            # Format kolom untuk tampilan yang lebih baik
+                            df_eval_display = df_eval.copy()
+                            if 'MAE' in df_eval_display.columns:
+                                df_eval_display['MAE (Rp)'] = df_eval_display['MAE'].apply(lambda x: f"Rp {x:,.0f}")
+                            if 'RMSE' in df_eval_display.columns:
+                                df_eval_display['RMSE (Rp)'] = df_eval_display['RMSE'].apply(lambda x: f"Rp {x:,.0f}")
+                            
+                            # Pilih kolom yang akan ditampilkan
+                            display_cols = ['Komoditas', 'MAPE (%)', 'MAE (Rp)', 'RMSE (Rp)']
+                            st.dataframe(df_eval_display[display_cols], use_container_width=True, height=400)
+                            
+                            # Statistik
+                            st.markdown("#### Ringkasan Statistik Evaluasi")
+                            col1, col2, col3 = st.columns(3)
+                            with col1:
+                                st.metric("Rata-rata MAPE", f"{df_eval['MAPE (%)'].mean():.2f}%")
+                            with col2:
+                                mae_col = 'MAE' if 'MAE' in df_eval.columns else 'MAE (Rp)'
+                                if mae_col in df_eval.columns:
+                                    mae_val = df_eval['MAE'].mean() if 'MAE' in df_eval.columns else df_eval['MAE (Rp)'].mean()
+                                    st.metric("Rata-rata MAE", f"Rp {mae_val:,.0f}")
+                            with col3:
+                                rmse_col = 'RMSE' if 'RMSE' in df_eval.columns else 'RMSE (Rp)'
+                                if rmse_col in df_eval.columns:
+                                    rmse_val = df_eval['RMSE'].mean() if 'RMSE' in df_eval.columns else df_eval['RMSE (Rp)'].mean()
+                                    st.metric("Rata-rata RMSE", f"Rp {rmse_val:,.0f}")
+                            
+                            # Visualisasi
+                            st.markdown("---")
+                            st.markdown("#### Visualisasi Metrik Evaluasi")
+                            
+                            col1, col2 = st.columns(2)
+                            
+                            with col1:
+                                # Grafik MAPE
+                                df_sorted = df_eval.sort_values('MAPE (%)')
+                                fig_mape = go.Figure()
+                                fig_mape.add_trace(go.Bar(
+                                    x=df_sorted['MAPE (%)'].head(10),
+                                    y=df_sorted['Komoditas'].head(10),
+                                    orientation='h',
+                                    marker=dict(color='#2c3e50'),
+                                    text=df_sorted['MAPE (%)'].head(10).apply(lambda x: f'{x:.2f}%'),
+                                    textposition='auto'
+                                ))
+                                fig_mape.update_layout(
+                                    title='Top 10 Komoditas - MAPE Terbaik',
+                                    xaxis_title='MAPE (%)',
+                                    yaxis_title='Komoditas',
+                                    height=400,
+                                    template='plotly_white',
+                                    plot_bgcolor='white',
+                                    paper_bgcolor='white'
+                                )
+                                st.plotly_chart(fig_mape, use_container_width=True)
+                            
+                            with col2:
+                                # Grafik RMSE
+                                mae_col = 'MAE' if 'MAE' in df_eval.columns else 'MAE (Rp)'
+                                df_sorted_mae = df_eval.sort_values(mae_col)
+                                fig_rmse = go.Figure()
+                                
+                                rmse_values = df_sorted_mae['RMSE'].head(10) if 'RMSE' in df_sorted_mae.columns else df_sorted_mae['RMSE (Rp)'].head(10)
+                                
+                                fig_rmse.add_trace(go.Bar(
+                                    x=rmse_values,
+                                    y=df_sorted_mae['Komoditas'].head(10),
+                                    orientation='h',
+                                    marker=dict(color='#34495e'),
+                                    text=rmse_values.apply(lambda x: f'Rp {x:,.0f}'),
+                                    textposition='auto'
+                                ))
+                                fig_rmse.update_layout(
+                                    title='Top 10 Komoditas - RMSE Terbaik',
+                                    xaxis_title='RMSE (Rp)',
+                                    yaxis_title='Komoditas',
+                                    height=400,
+                                    template='plotly_white',
+                                    plot_bgcolor='white',
+                                    paper_bgcolor='white'
+                                )
+                                st.plotly_chart(fig_rmse, use_container_width=True)
+                            
+                            # Tampilkan gambar evaluasi metrik jika ada
+                            if os.path.exists('evaluasi_metrik.png'):
+                                st.markdown("---")
+                                st.markdown("#### Visualisasi Lengkap Evaluasi Metrik")
+                                st.image('evaluasi_metrik.png', use_container_width=True)
+                            
+                            # Tampilkan gambar prediksi vs aktual jika ada
+                            if os.path.exists('prediksi_vs_aktual.png'):
+                                st.markdown("---")
+                                st.markdown("#### Grafik Prediksi vs Aktual")
+                                st.image('prediksi_vs_aktual.png', use_container_width=True)
                         
-                        st.markdown(f'<div class="success-box">Prediksi harga untuk <strong>{bulan_selected} {tahun_selected}</strong> berhasil dibuat</div>', unsafe_allow_html=True)
+                        else:
+                            st.markdown('<div class="info-box">File hasil evaluasi tidak ditemukan. Model tetap dapat digunakan untuk prediksi.</div>', unsafe_allow_html=True)
+                    
+                    # =====================================================================
+                    # TAB 2: PREDIKSI MASA DEPAN
+                    # =====================================================================
+                    with tab2:
+                        st.markdown("### Prediksi Harga Komoditas Masa Depan")
+                        st.markdown('<div class="info-box">Pilih bulan dan tahun yang ingin diprediksi, kemudian klik tombol "Mulai Prediksi" untuk melihat hasil prediksi harga seluruh komoditas</div>', unsafe_allow_html=True)
                         
-                        # Tampilkan hasil prediksi
-                        st.markdown("---")
-                        st.markdown("### Hasil Prediksi Harga")
-                        
-                        # Buat DataFrame hasil
-                        df_predictions = pd.DataFrame([
-                            {
-                                'Komoditas': k,
-                                'Prediksi Harga (Rp)': f"Rp {v:,.0f}",
-                                'Nilai': v
-                            }
-                            for k, v in predictions.items()
-                        ])
-                        
-                        # Tampilkan dalam 2 kolom
                         col1, col2 = st.columns(2)
                         
-                        mid = len(df_predictions) // 2
-                        
                         with col1:
-                            st.markdown("#### Komoditas 1 - {}".format(mid))
-                            st.dataframe(
-                                df_predictions[['Komoditas', 'Prediksi Harga (Rp)']].iloc[:mid],
-                                use_container_width=True,
-                                hide_index=True
-                            )
+                            bulan_options = {
+                                'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4,
+                                'Mei': 5, 'Juni': 6, 'Juli': 7, 'Agustus': 8,
+                                'September': 9, 'Oktober': 10, 'November': 11, 'Desember': 12
+                            }
+                            bulan_selected = st.selectbox("Pilih Bulan", list(bulan_options.keys()))
                         
                         with col2:
-                            st.markdown("#### Komoditas {} - {}".format(mid+1, len(df_predictions)))
-                            st.dataframe(
-                                df_predictions[['Komoditas', 'Prediksi Harga (Rp)']].iloc[mid:],
-                                use_container_width=True,
-                                hide_index=True
+                            tahun_selected = st.selectbox("Pilih Tahun", [2025, 2026, 2027])
+                        
+                        if st.button("Mulai Prediksi", key="predict_btn"):
+                            bulan_target = datetime(tahun_selected, bulan_options[bulan_selected], 15)
+                            
+                            # Siapkan sequence terakhir
+                            last_sequence = prepare_last_sequence(df_processed, komoditas_list, scalers)
+                            
+                            with st.spinner(f'Memprediksi harga untuk {bulan_selected} {tahun_selected}...'):
+                                predictions = predict_future(
+                                    model,
+                                    last_sequence,
+                                    scalers,
+                                    komoditas_list,
+                                    bulan_target
+                                )
+                            
+                            st.markdown(f'<div class="success-box">Prediksi harga untuk <strong>{bulan_selected} {tahun_selected}</strong> berhasil dibuat</div>', unsafe_allow_html=True)
+                            
+                            # Tampilkan hasil prediksi
+                            st.markdown("---")
+                            st.markdown("### Hasil Prediksi Harga")
+                            
+                            # Buat DataFrame hasil
+                            df_predictions = pd.DataFrame([
+                                {
+                                    'Komoditas': k,
+                                    'Prediksi Harga (Rp)': f"Rp {v:,.0f}",
+                                    'Nilai': v
+                                }
+                                for k, v in predictions.items()
+                            ])
+                            
+                            # Tampilkan dalam 2 kolom
+                            col1, col2 = st.columns(2)
+                            
+                            mid = len(df_predictions) // 2
+                            
+                            with col1:
+                                st.markdown("#### Komoditas 1 - {}".format(mid))
+                                st.dataframe(
+                                    df_predictions[['Komoditas', 'Prediksi Harga (Rp)']].iloc[:mid],
+                                    use_container_width=True,
+                                    hide_index=True
+                                )
+                            
+                            with col2:
+                                st.markdown("#### Komoditas {} - {}".format(mid+1, len(df_predictions)))
+                                st.dataframe(
+                                    df_predictions[['Komoditas', 'Prediksi Harga (Rp)']].iloc[mid:],
+                                    use_container_width=True,
+                                    hide_index=True
+                                )
+                            
+                            # Visualisasi top 10 komoditas termahal
+                            st.markdown("---")
+                            st.markdown("### Visualisasi Harga Prediksi")
+                            
+                            sorted_predictions = df_predictions.sort_values('Nilai', ascending=False).head(10)
+                            
+                            fig = go.Figure(data=[
+                                go.Bar(
+                                    x=sorted_predictions['Nilai'],
+                                    y=sorted_predictions['Komoditas'],
+                                    orientation='h',
+                                    marker=dict(color='#2c3e50'),
+                                    text=sorted_predictions['Nilai'].apply(lambda x: f'Rp {x:,.0f}'),
+                                    textposition='auto'
+                                )
+                            ])
+                            
+                            fig.update_layout(
+                                title=f'Top 10 Komoditas dengan Harga Tertinggi - {bulan_selected} {tahun_selected}',
+                                xaxis_title='Harga (Rp)',
+                                yaxis_title='Komoditas',
+                                height=500,
+                                template='plotly_white',
+                                plot_bgcolor='white',
+                                paper_bgcolor='white'
                             )
-                        
-                        # Visualisasi top 10 komoditas termahal
-                        st.markdown("---")
-                        st.markdown("### Visualisasi Harga Prediksi")
-                        
-                        sorted_predictions = df_predictions.sort_values('Nilai', ascending=False).head(10)
-                        
-                        fig = go.Figure(data=[
-                            go.Bar(
-                                x=sorted_predictions['Nilai'],
-                                y=sorted_predictions['Komoditas'],
-                                orientation='h',
-                                marker=dict(color='#2c3e50'),
-                                text=sorted_predictions['Nilai'].apply(lambda x: f'Rp {x:,.0f}'),
-                                textposition='auto'
+                            
+                            st.plotly_chart(fig, use_container_width=True)
+                            
+                            # Visualisasi top 10 komoditas termurah
+                            st.markdown("---")
+                            sorted_predictions_cheap = df_predictions.sort_values('Nilai', ascending=True).head(10)
+                            
+                            fig2 = go.Figure(data=[
+                                go.Bar(
+                                    x=sorted_predictions_cheap['Nilai'],
+                                    y=sorted_predictions_cheap['Komoditas'],
+                                    orientation='h',
+                                    marker=dict(color='#34495e'),
+                                    text=sorted_predictions_cheap['Nilai'].apply(lambda x: f'Rp {x:,.0f}'),
+                                    textposition='auto'
+                                )
+                            ])
+                            
+                            fig2.update_layout(
+                                title=f'Top 10 Komoditas dengan Harga Terendah - {bulan_selected} {tahun_selected}',
+                                xaxis_title='Harga (Rp)',
+                                yaxis_title='Komoditas',
+                                height=500,
+                                template='plotly_white',
+                                plot_bgcolor='white',
+                                paper_bgcolor='white'
                             )
-                        ])
-                        
-                        fig.update_layout(
-                            title=f'Top 10 Komoditas dengan Harga Tertinggi - {bulan_selected} {tahun_selected}',
-                            xaxis_title='Harga (Rp)',
-                            yaxis_title='Komoditas',
-                            height=500,
-                            template='plotly_white',
-                            plot_bgcolor='white',
-                            paper_bgcolor='white'
-                        )
-                        
-                        st.plotly_chart(fig, use_container_width=True)
-                        
-                        # Visualisasi top 10 komoditas termurah
-                        st.markdown("---")
-                        sorted_predictions_cheap = df_predictions.sort_values('Nilai', ascending=True).head(10)
-                        
-                        fig2 = go.Figure(data=[
-                            go.Bar(
-                                x=sorted_predictions_cheap['Nilai'],
-                                y=sorted_predictions_cheap['Komoditas'],
-                                orientation='h',
-                                marker=dict(color='#34495e'),
-                                text=sorted_predictions_cheap['Nilai'].apply(lambda x: f'Rp {x:,.0f}'),
-                                textposition='auto'
+                            
+                            st.plotly_chart(fig2, use_container_width=True)
+                            
+                            # Download button
+                            st.markdown("---")
+                            st.markdown("### Unduh Hasil Prediksi")
+                            csv = df_predictions[['Komoditas', 'Prediksi Harga (Rp)']].to_csv(index=False, encoding='utf-8-sig')
+                            st.download_button(
+                                label="Unduh Hasil Prediksi (CSV)",
+                                data=csv,
+                                file_name=f"prediksi_harga_{bulan_selected}_{tahun_selected}.csv",
+                                mime="text/csv"
                             )
-                        ])
-                        
-                        fig2.update_layout(
-                            title=f'Top 10 Komoditas dengan Harga Terendah - {bulan_selected} {tahun_selected}',
-                            xaxis_title='Harga (Rp)',
-                            yaxis_title='Komoditas',
-                            height=500,
-                            template='plotly_white',
-                            plot_bgcolor='white',
-                            paper_bgcolor='white'
-                        )
-                        
-                        st.plotly_chart(fig2, use_container_width=True)
-                        
-                        # Download button
-                        st.markdown("---")
-                        st.markdown("### Unduh Hasil Prediksi")
-                        csv = df_predictions[['Komoditas', 'Prediksi Harga (Rp)']].to_csv(index=False, encoding='utf-8-sig')
-                        st.download_button(
-                            label="Unduh Hasil Prediksi (CSV)",
-                            data=csv,
-                            file_name=f"prediksi_harga_{bulan_selected}_{tahun_selected}.csv",
-                            mime="text/csv"
-                        )
         
     except Exception as e:
         st.error(f"Terjadi kesalahan: {str(e)}")
-        st.error("Pastikan format file sesuai dengan yang diharapkan")
+        import traceback
+        st.error(traceback.format_exc())
 
 else:
-    # Tampilan awal sebelum upload
+    # Tampilan jika file tidak ditemukan
     st.markdown("""
     <div class="warning-box">
-        <h3>Upload File yang Diperlukan</h3>
-        <p style="margin: 0.5rem 0;">Untuk memulai prediksi, silakan upload 2 file berikut di sidebar:</p>
-        <ol style="padding-left: 1.5rem; margin-top: 0.5rem;">
-            <li style="margin-bottom: 0.5rem;"><strong>best_lstm_model.h5</strong> - Model LSTM yang sudah dilatih dari Google Colab</li>
-            <li style="margin-bottom: 0.5rem;"><strong>Dataset Excel</strong> - Data historis harga pangan</li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="info-box">
-        <h3>Panduan Penggunaan Aplikasi</h3>
-        <ol style="padding-left: 1.5rem;">
-            <li style="margin-bottom: 0.5rem;">Upload file <strong>best_lstm_model.h5</strong> di sidebar</li>
-            <li style="margin-bottom: 0.5rem;">Upload dataset Excel dengan format yang sesuai</li>
-            <li style="margin-bottom: 0.5rem;">Pilih tab <strong>Evaluasi Model</strong> untuk melihat performa model</li>
-            <li style="margin-bottom: 0.5rem;">Pilih tab <strong>Prediksi Harga Masa Depan</strong> untuk melakukan prediksi</li>
-            <li style="margin-bottom: 0.5rem;">Pilih bulan dan tahun yang ingin diprediksi</li>
-            <li style="margin-bottom: 0.5rem;">Klik tombol <strong>Mulai Prediksi</strong> untuk melihat hasil</li>
-            <li style="margin-bottom: 0.5rem;">Unduh hasil prediksi dalam format CSV jika diperlukan</li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    st.markdown("""
-    <div class="info-box">
-        <h3>Fitur Aplikasi</h3>
-        <ul style="padding-left: 1.5rem;">
-            <li style="margin-bottom: 0.5rem;">Menggunakan model LSTM yang sudah dilatih (tidak perlu training ulang)</li>
-            <li style="margin-bottom: 0.5rem;">Melihat hasil evaluasi performa model (MAPE, MAE, RMSE)</li>
-            <li style="margin-bottom: 0.5rem;">Prediksi harga untuk 31 jenis komoditas pangan</li>
-            <li style="margin-bottom: 0.5rem;">Visualisasi interaktif hasil prediksi</li>
-            <li style="margin-bottom: 0.5rem;">Export hasil prediksi ke format CSV</li>
-            <li style="margin-bottom: 0.5rem;">Antarmuka yang responsif dan mudah digunakan</li>
+        <h3>File yang Diperlukan Tidak Ditemukan</h3>
+        <p style="margin: 0.5rem 0;">Pastikan file-file berikut ada di direktori yang sama dengan app.py:</p>
+        <ul style="padding-left: 1.5rem; margin-top: 0.5rem;">
+            <li style="margin-bottom: 0.5rem;"><strong>best_lstm_model.h5</strong> - Model LSTM yang sudah dilatih</li>
+            <li style="margin-bottom: 0.5rem;"><strong>dataset.xlsx</strong> - Dataset historis harga pangan</li>
+            <li style="margin-bottom: 0.5rem;"><strong>hasil_evaluasi_lstm_100epochs.csv</strong> - File evaluasi (opsional)</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("---")
-    
-    # Informasi tambahan
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        <div class="info-box">
-            <h4>Tab Evaluasi Model</h4>
-            <p style="margin: 0.5rem 0;">Melihat hasil evaluasi performa model yang sudah dilatih, termasuk metrik MAPE, MAE, dan RMSE untuk setiap komoditas dengan visualisasi yang informatif.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class="info-box">
-            <h4>Tab Prediksi Masa Depan</h4>
-            <p style="margin: 0.5rem 0;">Memilih bulan dan tahun untuk memprediksi harga komoditas di masa depan dengan hasil yang dapat diunduh dalam format CSV.</p>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown("""
+    <div class="info-box">
+        <h3>Struktur Direktori yang Benar</h3>
+        <pre style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px; margin-top: 0.5rem;">
+project/
+├── app.py
+├── best_lstm_model.h5
+├── dataset.xlsx
+├── hasil_evaluasi_lstm_100epochs.csv
+├── evaluasi_metrik.png (opsional)
+├── prediksi_vs_aktual.png (opsional)
+└── requirements.txt
+        </pre>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Footer
 st.markdown("---")
