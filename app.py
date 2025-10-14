@@ -24,7 +24,7 @@ st.set_page_config(
 # Custom CSS - Enhanced Modern Design
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
     * {
         font-family: 'Inter', sans-serif;
@@ -71,6 +71,33 @@ st.markdown("""
         padding-bottom: 0.5rem;
         border-bottom: 3px solid #667eea;
         display: inline-block;
+    }
+    
+    /* Custom alert boxes */
+    .custom-alert {
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin: 1rem 0;
+        border-left: 4px solid;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+    
+    .alert-success {
+        background-color: #d1fae5;
+        border-color: #10b981;
+        color: #065f46;
+    }
+    
+    .alert-info {
+        background-color: #dbeafe;
+        border-color: #3b82f6;
+        color: #1e40af;
+    }
+    
+    .alert-warning {
+        background-color: #fef3c7;
+        border-color: #f59e0b;
+        color: #92400e;
     }
     
     /* Streamlit native components enhancement */
@@ -152,24 +179,36 @@ def load_and_validate_metrics(komoditas_list_from_dataset):
         dataset_komoditas = set(komoditas_list_from_dataset)
         
         if csv_komoditas != dataset_komoditas:
-            st.warning(f"""
-            ⚠️ **Dataset berbeda terdeteksi!**
-            
-            - Komoditas di file evaluasi: {len(csv_komoditas)} items
-            - Komoditas di dataset upload: {len(dataset_komoditas)} items
-            
-            Sistem akan menghitung metrik evaluasi secara **real-time** berdasarkan dataset yang baru diupload.
-            """)
+            st.markdown("""
+            <div class="custom-alert alert-warning">
+                <strong>⚠️ Dataset berbeda terdeteksi!</strong><br><br>
+                - Komoditas di file evaluasi: {} items<br>
+                - Komoditas di dataset upload: {} items<br><br>
+                Sistem akan menghitung metrik evaluasi secara <strong>real-time</strong> berdasarkan dataset yang baru diupload.
+            </div>
+            """.format(len(csv_komoditas), len(dataset_komoditas)), unsafe_allow_html=True)
             return None, "different_dataset"
         
-        st.success("✅ Menggunakan metrik evaluasi pre-computed dari hasil training (100 epochs optimal)")
+        st.markdown("""
+        <div class="custom-alert alert-success">
+            <strong>✅ Menggunakan metrik evaluasi pre-computed dari hasil training (100 epochs optimal)</strong>
+        </div>
+        """, unsafe_allow_html=True)
         return df_eval, "same_dataset"
         
     except FileNotFoundError:
-        st.info("ℹ️ File evaluasi pre-computed tidak ditemukan. Menghitung metrik secara real-time...")
+        st.markdown("""
+        <div class="custom-alert alert-info">
+            <strong>ℹ️ File evaluasi pre-computed tidak ditemukan. Menghitung metrik secara real-time...</strong>
+        </div>
+        """, unsafe_allow_html=True)
         return None, "file_not_found"
     except Exception as e:
-        st.warning(f"⚠️ Error loading evaluation file: {str(e)}. Menghitung metrik secara real-time...")
+        st.markdown(f"""
+        <div class="custom-alert alert-warning">
+            <strong>⚠️ Error loading evaluation file: {str(e)}. Menghitung metrik secara real-time...</strong>
+        </div>
+        """, unsafe_allow_html=True)
         return None, "error"
 
 def calculate_metrics_realtime(model, data_normalized, scalers, komoditas_list, TIME_STEPS=20):
@@ -218,45 +257,40 @@ with st.sidebar:
     st.markdown("### 📊 Informasi Model")
     st.markdown("---")
     
-    with ui.card(key="model_arch_card"):
-        st.markdown("**🏗️ Arsitektur Model**")
-        ui.badges(badge_list=[("LSTM", "default"), ("Bidirectional", "secondary"), ("Dense", "outline")], key="arch_badges")
-        st.markdown("""
-        - Bidirectional LSTM (128 units)
-        - LSTM (64 units)
-        - Dense Layers (64, 32)
-        - Regularisasi: L2 + Dropout
-        """)
+    st.markdown("**🏗️ Arsitektur Model**")
+    ui.badges(badge_list=[("LSTM", "default"), ("Bidirectional", "secondary"), ("Dense", "outline")], key="arch_badges")
+    st.markdown("""
+    - Bidirectional LSTM (128 units)
+    - LSTM (64 units)
+    - Dense Layers (64, 32)
+    - Regularisasi: L2 + Dropout
+    """)
     
     st.markdown("---")
+    st.markdown("**⚙️ Hyperparameter**")
     
-    with ui.card(key="hyperparams_card"):
-        st.markdown("**⚙️ Hyperparameter**")
-        col1, col2 = st.columns(2)
-        with col1:
-            ui.metric_card(title="Epochs", content="100", key="metric_epochs")
-        with col2:
-            ui.metric_card(title="Batch Size", content="32", key="metric_batch")
-        
-        st.markdown("""
-        - Learning Rate: 0.001
-        - Optimizer: Adam
-        - Loss: Huber Loss
-        """)
+    col1, col2 = st.columns(2)
+    with col1:
+        ui.metric_card(title="Epochs", content="100", key="metric_epochs")
+    with col2:
+        ui.metric_card(title="Batch Size", content="32", key="metric_batch")
     
-    st.markdown("---")
-    
-    with ui.card(key="preprocess_card"):
-        st.markdown("**🔧 Preprocessing**")
-        st.markdown("""
-        - Time Steps: 20
-        - Normalisasi: MinMaxScaler
-        - Train/Test Split: 90/10
-        - Interpolasi: Linear
-        """)
+    st.markdown("""
+    - Learning Rate: 0.001
+    - Optimizer: Adam
+    - Loss: Huber Loss
+    """)
     
     st.markdown("---")
+    st.markdown("**🔧 Preprocessing**")
+    st.markdown("""
+    - Time Steps: 20
+    - Normalisasi: MinMaxScaler
+    - Train/Test Split: 90/10
+    - Interpolasi: Linear
+    """)
     
+    st.markdown("---")
     ui.badges(badge_list=[("Target MAPE < 10%", "destructive"), ("Early Stopping", "default")], key="performance_badges")
 
 # ===========================================================================================
@@ -285,7 +319,12 @@ if uploaded_file is not None:
         df_raw = pd.read_excel(uploaded_file)
         komoditas_list = df_raw.iloc[:, 1].tolist()
         
-        ui.alert(key="dataset_success", title="Dataset Berhasil Dimuat!", description=f"Total {len(komoditas_list)} komoditas dengan {df_raw.shape[1] - 2} data points", variant="default")
+        st.markdown(f"""
+        <div class="custom-alert alert-success">
+            <strong>✅ Dataset Berhasil Dimuat!</strong><br>
+            Total {len(komoditas_list)} komoditas dengan {df_raw.shape[1] - 2} data points
+        </div>
+        """, unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -307,30 +346,30 @@ if uploaded_file is not None:
         col_form1, col_form2, col_form3 = st.columns(3)
         
         with col_form1:
-            selected_commodity = ui.select(
+            selected_commodity = st.selectbox(
+                "Pilih Komoditas",
                 options=komoditas_list,
-                key="select_commodity",
-                label="Pilih Komoditas"
+                key="select_commodity"
             )
         
         with col_form2:
-            selected_year = ui.select(
+            selected_year = st.selectbox(
+                "Pilih Tahun",
                 options=[2025, 2026],
-                key="select_year",
-                label="Pilih Tahun"
+                key="select_year"
             )
         
         with col_form3:
-            selected_month = ui.select(
+            selected_month = st.selectbox(
+                "Pilih Bulan",
                 options=['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
-                key="select_month",
-                label="Pilih Bulan"
+                key="select_month"
             )
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        predict_btn = ui.button(text="🚀 Prediksi Harga Sekarang", key="predict_button", variant="default", size="lg")
+        predict_btn = ui.button(text="🚀 Prediksi Harga Sekarang", key="predict_button", variant="default")
         
         if predict_btn:
             with st.spinner("🔄 Memproses prediksi..."):
@@ -427,9 +466,17 @@ if uploaded_file is not None:
                     
                     # Info sumber metrik
                     if metric_source == "pre-computed (100 epochs optimal)":
-                        st.info("📊 **Metrik Evaluasi:** Menggunakan hasil pre-computed dari training 100 epochs (dataset original)")
+                        st.markdown("""
+                        <div class="custom-alert alert-info">
+                            <strong>📊 Metrik Evaluasi:</strong> Menggunakan hasil pre-computed dari training 100 epochs (dataset original)
+                        </div>
+                        """, unsafe_allow_html=True)
                     else:
-                        st.warning("📊 **Metrik Evaluasi:** Dihitung secara real-time dari dataset yang baru diupload")
+                        st.markdown("""
+                        <div class="custom-alert alert-warning">
+                            <strong>📊 Metrik Evaluasi:</strong> Dihitung secara real-time dari dataset yang baru diupload
+                        </div>
+                        """, unsafe_allow_html=True)
                     
                     col_result1, col_result2, col_result3, col_result4 = st.columns(4)
                     
@@ -513,15 +560,16 @@ if uploaded_file is not None:
                         
                         st.plotly_chart(fig1, use_container_width=True)
                         
-                        with ui.card(key="prediction_info_card"):
-                            st.markdown(f"""
-                            **📋 Informasi Prediksi:**
-                            - **Komoditas:** {selected_commodity}
-                            - **Periode Target:** {selected_month} {selected_year}
-                            - **Minggu Prediksi:** {weeks_to_predict} minggu
-                            - **Tanggal Data Terakhir:** {last_date.strftime('%d %B %Y')}
-                            - **Harga Prediksi:** Rp {predicted_price:,.0f}
-                            """)
+                        st.markdown(f"""
+                        <div class="custom-alert alert-info">
+                            <strong>📋 Informasi Prediksi:</strong><br>
+                            • <strong>Komoditas:</strong> {selected_commodity}<br>
+                            • <strong>Periode Target:</strong> {selected_month} {selected_year}<br>
+                            • <strong>Minggu Prediksi:</strong> {weeks_to_predict} minggu<br>
+                            • <strong>Tanggal Data Terakhir:</strong> {last_date.strftime('%d %B %Y')}<br>
+                            • <strong>Harga Prediksi:</strong> Rp {predicted_price:,.0f}
+                        </div>
+                        """, unsafe_allow_html=True)
                     
                     with tab2:
                         st.markdown(f"#### Evaluasi Performa Model untuk Semua Komoditas")
@@ -715,17 +763,16 @@ if uploaded_file is not None:
                             )
                             st.plotly_chart(fig4, use_container_width=True)
                         
-                        with ui.card(key="metric_detail_card"):
-                            st.markdown(f"""
-                            **📊 Status Performa - {selected_commodity}:**
-                            - **RMSE:** Rp {rmse:,.2f}
-                            - **MAE:** Rp {mae:,.2f}
-                            - **MAPE:** {mape:.2f}%
-                            
-                            **Evaluasi:** {'🟢 Excellent' if mape < 5 else '🟡 Good' if mape < 10 else '🟠 Fair' if mape < 20 else '🔴 Poor'}
-                            
-                            **Interpretasi:** MAPE {mape:.2f}% berarti prediksi rata-rata meleset {mape:.2f}% dari nilai aktual
-                            """)
+                        st.markdown(f"""
+                        <div class="custom-alert alert-info">
+                            <strong>📊 Status Performa - {selected_commodity}:</strong><br><br>
+                            • <strong>RMSE:</strong> Rp {rmse:,.2f}<br>
+                            • <strong>MAE:</strong> Rp {mae:,.2f}<br>
+                            • <strong>MAPE:</strong> {mape:.2f}%<br><br>
+                            <strong>Evaluasi:</strong> {'🟢 Excellent' if mape < 5 else '🟡 Good' if mape < 10 else '🟠 Fair' if mape < 20 else '🔴 Poor'}<br><br>
+                            <strong>Interpretasi:</strong> MAPE {mape:.2f}% berarti prediksi rata-rata meleset {mape:.2f}% dari nilai aktual
+                        </div>
+                        """, unsafe_allow_html=True)
                     
                 except Exception as e:
                     st.error(f"❌ Error: {str(e)}")
@@ -736,17 +783,18 @@ if uploaded_file is not None:
         st.error(f"❌ Error saat membaca dataset: {str(e)}")
 
 else:
-    with ui.card(key="upload_instruction_card"):
-        st.markdown("### 📤 Silakan Upload Dataset")
-        st.markdown("#### Format Dataset yang Diharapkan:")
-        st.markdown("""
-        - **Kolom 1**: No (1, 2, 3, ...)
-        - **Kolom 2**: Nama Komoditas
-        - **Kolom 3+**: Data harga dengan header tanggal
-        - **File format**: Excel (.xlsx)
-        """)
-        
-        ui.badges(badge_list=[("Excel", "default"), (".xlsx", "secondary"), ("Required", "destructive")], key="format_badges")
+    st.markdown("""
+    <div class="custom-alert alert-info">
+        <strong>📤 Silakan Upload Dataset</strong><br><br>
+        <strong>Format Dataset yang Diharapkan:</strong><br>
+        • <strong>Kolom 1:</strong> No (1, 2, 3, ...)<br>
+        • <strong>Kolom 2:</strong> Nama Komoditas<br>
+        • <strong>Kolom 3+:</strong> Data harga dengan header tanggal<br>
+        • <strong>File format:</strong> Excel (.xlsx)
+    </div>
+    """, unsafe_allow_html=True)
+    
+    ui.badges(badge_list=[("Excel", "default"), (".xlsx", "secondary"), ("Required", "destructive")], key="format_badges")
 
 st.markdown("---")
 st.markdown("""
