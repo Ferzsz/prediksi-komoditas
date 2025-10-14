@@ -105,6 +105,16 @@ st.markdown("""
         font-size: 1rem;
         color: #7f8c8d;
     }
+    
+    /* Menyatukan padding metrik agar tidak terpisah */
+    [data-testid="column"] {
+        padding: 0 0.5rem !important;
+    }
+    
+    /* Menghilangkan gap antar kolom metrik */
+    [data-testid="stHorizontalBlock"] {
+        gap: 0.5rem !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -407,7 +417,8 @@ if uploaded_file is not None:
                     else:
                         st.markdown('<div class="warning-box">📊 <strong>Metrik Evaluasi:</strong> Dihitung secara real-time dari dataset yang baru diupload</div>', unsafe_allow_html=True)
                     
-                    col_result1, col_result2, col_result3, col_result4 = st.columns(4)
+                    # PERUBAHAN: Menghilangkan gap dan menyatukan padding metrik
+                    col_result1, col_result2, col_result3, col_result4 = st.columns(4, gap="small")
                     
                     with col_result1:
                         st.markdown('<div class="metric-card">', unsafe_allow_html=True)
@@ -479,15 +490,7 @@ if uploaded_file is not None:
                         
                         st.plotly_chart(fig1, use_container_width=True)
                         
-                        st.markdown(f"""
-                        <div class="info-box">
-                            <strong>Informasi Prediksi:</strong><br>
-                            Komoditas: {selected_commodity}<br>
-                            Periode Target: {selected_month} {selected_year}<br>
-                            Minggu Prediksi: {weeks_to_predict} minggu<br>
-                            Tanggal Data Terakhir: {last_date.strftime('%d %B %Y')}
-                        </div>
-                        """, unsafe_allow_html=True)
+                        # PERUBAHAN: Menghilangkan box informasi prediksi
                     
                     with tab2:
                         st.markdown(f"#### Evaluasi Performa Model untuk Semua Komoditas")
