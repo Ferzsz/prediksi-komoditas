@@ -507,7 +507,7 @@ if model_exists and uploaded_dataset is not None:
                         )
                     
                     with col2:
-                        tahun_selected = st.selectbox("Pilih Tahun", [2025, 2026, 2027, 2028])
+                        tahun_selected = st.selectbox("Pilih Tahun", [2025, 2026])
                     
                     with col3:
                         bulan_options = {
