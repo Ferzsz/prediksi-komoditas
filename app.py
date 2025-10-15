@@ -129,6 +129,62 @@ def format_currency(value):
     return f"Rp {value:,.0f}"
 
 # ===================================================================
+# SIDEBAR - INFORMASI MODEL
+# ===================================================================
+
+st.sidebar.title("Informasi Model")
+st.sidebar.markdown("---")
+
+st.sidebar.subheader("Arsitektur LSTM")
+st.sidebar.markdown("""
+**Model:** Multi-layer LSTM
+
+**Struktur Layer:**
+- Layer 1: LSTM (128 units) + Dropout (0.2)
+- Layer 2: LSTM (64 units) + Dropout (0.2)
+- Layer 3: LSTM (32 units) + Dropout (0.2)
+- Output: Dense (1 unit)
+""")
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("Hyperparameters")
+st.sidebar.markdown("""
+- **Optimizer:** Adam
+- **Learning Rate:** 0.001
+- **Loss Function:** MSE
+- **Batch Size:** 32
+- **Epochs:** 100
+- **Early Stopping:** Patience 10
+- **Time Steps:** 7 periode
+""")
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("Data Training")
+st.sidebar.markdown("""
+- **Periode Data:** 2020-2025
+- **Jumlah Komoditas:** 31
+- **Split Ratio:** 80% Train / 20% Test
+- **Normalisasi:** MinMaxScaler (0-1)
+""")
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("Metrik Evaluasi")
+st.sidebar.markdown("""
+- **RMSE:** Root Mean Squared Error
+- **MAE:** Mean Absolute Error
+- **MAPE:** Mean Absolute Percentage Error
+- **Target MAPE:** < 20%
+""")
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("Periode Forecasting")
+st.sidebar.markdown("""
+- **Periode:** Nov 2025 - Des 2026
+- **Total Bulan:** 14 bulan
+- **Metode:** Iterative Forecasting
+""")
+
+# ===================================================================
 # HEADER
 # ===================================================================
 
@@ -138,40 +194,20 @@ st.markdown("""
 Aplikasi ini menggunakan model **LSTM (Long Short-Term Memory)** untuk memprediksi 
 harga 31 komoditas pangan di Indonesia untuk periode **2025-2026**.
 """)
-st.markdown("---")
 
 # ===================================================================
-# SIDEBAR - UPLOAD DATASET
+# MENU TAB
 # ===================================================================
 
-st.sidebar.title("Menu Navigasi")
-
-# Upload dataset
-with st.sidebar.expander("Upload Dataset (Opsional)", expanded=False):
-    uploaded_file = st.file_uploader(
-        "Upload file dataset.xlsx",
-        type=['xlsx'],
-        help="Upload dataset jika ingin melihat data historis"
-    )
-    if uploaded_file is not None:
-        try:
-            df_uploaded = pd.read_excel(uploaded_file)
-            st.success("Dataset berhasil diupload!")
-            st.session_state['dataset'] = df_uploaded
-        except Exception as e:
-            st.error(f"Error: {str(e)}")
-
-menu = st.sidebar.radio(
-    "Pilih Fitur:",
-    ["Prediksi Harga", "Evaluasi Model"]
-)
+tab1, tab2 = st.tabs(["Prediksi Harga", "Evaluasi Model"])
 
 # ===================================================================
-# FITUR 1: PREDIKSI HARGA
+# TAB 1: PREDIKSI HARGA
 # ===================================================================
 
-if menu == "Prediksi Harga":
+with tab1:
     st.header("Prediksi Harga Komoditas")
+    st.markdown("---")
     
     # Load data
     forecast_df = load_forecasting_data()
@@ -214,7 +250,7 @@ if menu == "Prediksi Harga":
             )
         
         # Button prediksi
-        if st.button("Prediksi Harga", type="primary"):
+        if st.button("Prediksi Harga", type="primary", use_container_width=True):
             # Get column name
             col_name = get_month_column(selected_year, selected_month)
             
@@ -290,11 +326,12 @@ if menu == "Prediksi Harga":
         st.error("Data forecasting tidak tersedia. Pastikan file hasil_forecasting.csv ada di repository.")
 
 # ===================================================================
-# FITUR 2: EVALUASI MODEL
+# TAB 2: EVALUASI MODEL
 # ===================================================================
 
-elif menu == "Evaluasi Model":
+with tab2:
     st.header("Evaluasi Model LSTM")
+    st.markdown("---")
     
     # Load evaluation data
     eval_df = load_evaluation_data()
@@ -409,10 +446,10 @@ elif menu == "Evaluasi Model":
         # Legend
         st.markdown("""
         **Keterangan Warna:**
-        - 🟢 Hijau: MAPE < 10% (Sangat Baik)
-        - 🔵 Biru: MAPE 10-20% (Baik)
-        - 🟠 Oranye: MAPE 20-30% (Cukup)
-        - 🔴 Merah: MAPE > 30% (Perlu Perbaikan)
+        - Hijau: MAPE < 10% (Sangat Baik)
+        - Biru: MAPE 10-20% (Baik)
+        - Oranye: MAPE 20-30% (Cukup)
+        - Merah: MAPE > 30% (Perlu Perbaikan)
         """)
         
         # Comparison chart
@@ -464,7 +501,8 @@ elif menu == "Evaluasi Model":
             label="Download Hasil Evaluasi (CSV)",
             data=csv,
             file_name="hasil_evaluasi_model.csv",
-            mime="text/csv"
+            mime="text/csv",
+            use_container_width=True
         )
         
     else:
