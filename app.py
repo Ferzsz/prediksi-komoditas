@@ -211,8 +211,9 @@ with tab1:
     
     # Load data
     forecast_df = load_forecasting_data()
+    eval_df = load_evaluation_data()
     
-    if forecast_df is not None:
+    if forecast_df is not None and eval_df is not None:
         # Daftar komoditas
         commodities = forecast_df.index.tolist()
         
@@ -258,72 +259,69 @@ with tab1:
                 # Get predicted price
                 predicted_price = forecast_df.loc[selected_commodity, col_name]
                 
+                # Get evaluation metrics untuk komoditas terpilih
+                eval_row = eval_df[eval_df['Komoditas'] == selected_commodity].iloc[0]
+                rmse_test = eval_row['RMSE_Test']
+                mae_test = eval_row['MAE_Test']
+                mape_test = eval_row['MAPE_Test (%)']
+                
                 # Display result
                 st.markdown("---")
                 st.subheader("Hasil Prediksi")
                 
-                col1, col2 = st.columns([1, 2])
+                # Tampilkan 4 metrik dalam satu baris
+                col1, col2, col3, col4 = st.columns(4)
                 
                 with col1:
                     st.metric(
-                        label=f"Harga Prediksi - {month_labels[months.index(selected_month)]} {selected_year}",
+                        label="Harga Prediksi",
                         value=format_currency(predicted_price)
                     )
-                    
-                    st.info(f"""
-                    **Detail Prediksi:**
-                    - Komoditas: {selected_commodity}
-                    - Periode: {month_labels[months.index(selected_month)]} {selected_year}
-                    - Model: LSTM 3-Layer
-                    """)
                 
                 with col2:
-                    # Plot trend forecasting untuk komoditas terpilih
-                    commodity_data = forecast_df.loc[selected_commodity]
-                    
-                    fig = go.Figure()
-                    fig.add_trace(go.Scatter(
-                        x=commodity_data.index,
-                        y=commodity_data.values,
-                        mode='lines+markers',
-                        name='Prediksi Harga',
-                        line=dict(color='blue', width=2),
-                        marker=dict(size=8)
-                    ))
-                    
-                    # Highlight selected month
-                    fig.add_trace(go.Scatter(
-                        x=[col_name],
-                        y=[predicted_price],
-                        mode='markers',
-                        name='Bulan Terpilih',
-                        marker=dict(size=15, color='red', symbol='star')
-                    ))
-                    
-                    fig.update_layout(
-                        title=f'Trend Forecasting: {selected_commodity}',
-                        xaxis_title='Periode',
-                        yaxis_title='Harga (Rp)',
-                        hovermode='x unified',
-                        height=400
+                    st.metric(
+                        label="RMSE",
+                        value=f"{rmse_test:,.2f}"
                     )
-                    
-                    st.plotly_chart(fig, use_container_width=True)
                 
-                # Tabel forecasting lengkap
+                with col3:
+                    st.metric(
+                        label="MAE",
+                        value=f"{mae_test:,.2f}"
+                    )
+                
+                with col4:
+                    st.metric(
+                        label="MAPE",
+                        value=f"{mape_test:.2f}%"
+                    )
+                
+                # Indikator performa
                 st.markdown("---")
-                st.subheader("Tabel Prediksi Lengkap")
+                status, color = get_performance_indicator(mape_test)
                 
-                # Format tabel
-                display_data = commodity_data.to_frame(name='Harga Prediksi (Rp)')
-                display_data['Harga Prediksi (Rp)'] = display_data['Harga Prediksi (Rp)'].apply(lambda x: f"Rp {x:,.0f}")
+                if status == "Sangat Baik":
+                    st.success(f"**Status Akurasi Model: {status}** - Model ini memiliki akurasi sangat tinggi dengan MAPE < 10%")
+                elif status == "Baik":
+                    st.info(f"**Status Akurasi Model: {status}** - Model ini memiliki akurasi baik dengan MAPE < 20%")
+                elif status == "Cukup":
+                    st.warning(f"**Status Akurasi Model: {status}** - Model ini memiliki akurasi cukup dengan MAPE 20-30%")
+                else:
+                    st.error(f"**Status Akurasi Model: {status}** - Model ini perlu perbaikan dengan MAPE > 30%")
                 
-                st.dataframe(display_data, use_container_width=True)
+                # Info detail
+                st.info(f"""
+                **Detail Prediksi:**
+                - Komoditas: {selected_commodity}
+                - Periode: {month_labels[months.index(selected_month)]} {selected_year}
+                - Model: LSTM 3-Layer
+                - Harga Prediksi: {format_currency(predicted_price)}
+                """)
                 
             except Exception as e:
                 st.error(f"Error: {str(e)}")
     else:
-        st.error("Data forecasting tidak tersedia. Pastikan file hasil_forecasting.csv ada di repository.")
+        st.error("Data tidak tersedia. Pastikan file hasil_forecasting.csv dan hasil_evaluasi.csv ada di repository.")
 
 # ===================================================================
 # TAB 2: EVALUASI MODEL
@@ -374,18 +372,6 @@ with tab2:
         # Detail evaluasi per komoditas
         st.markdown("---")
         st.subheader("Detail Evaluasi per Komoditas")
-        
-        # Add color coding untuk status
-        def color_mape(val):
-            if val < 10:
-                color = 'background-color: #d4edda'
-            elif val < 20:
-                color = 'background-color: #d1ecf1'
-            elif val < 30:
-                color = 'background-color: #fff3cd'
-            else:
-                color = 'background-color: #f8d7da'
-            return color
         
         # Format dataframe
         display_df = eval_df.copy()
