@@ -91,16 +91,6 @@ def load_evaluation_data():
         st.error(f"Error loading evaluation data: {str(e)}")
         return None
 
-@st.cache_data
-def load_dataset():
-    """Load dataset asli"""
-    try:
-        df = pd.read_excel('dataset.xlsx')
-        return df
-    except Exception as e:
-        st.error(f"Error loading dataset: {str(e)}")
-        return None
-
 # ===================================================================
 # FUNGSI HELPER
 # ===================================================================
@@ -129,10 +119,31 @@ def format_currency(value):
     return f"Rp {value:,.0f}"
 
 # ===================================================================
-# SIDEBAR - INFORMASI MODEL
+# SIDEBAR - INFORMASI MODEL & UPLOAD DATASET
 # ===================================================================
 
 st.sidebar.title("Informasi Model")
+st.sidebar.markdown("---")
+
+# UPLOAD DATASET
+with st.sidebar.expander("📂 Upload Dataset", expanded=False):
+    uploaded_file = st.file_uploader(
+        "Upload file dataset.xlsx untuk melihat data historis",
+        type=['xlsx'],
+        help="Format: Excel dengan kolom [No, Komoditas (Rp), periode...]"
+    )
+    if uploaded_file is not None:
+        try:
+            df_uploaded = pd.read_excel(uploaded_file)
+            st.success(f"Dataset berhasil diupload: {df_uploaded.shape[0]} komoditas")
+            st.session_state['dataset'] = df_uploaded
+            
+            # Preview dataset
+            if st.checkbox("Tampilkan Preview Dataset"):
+                st.dataframe(df_uploaded.head(10), use_container_width=True)
+        except Exception as e:
+            st.error(f"Error: {str(e)}")
+
 st.sidebar.markdown("---")
 
 st.sidebar.subheader("Arsitektur LSTM")
