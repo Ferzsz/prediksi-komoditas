@@ -118,6 +118,17 @@ def format_currency(value):
     """Format angka ke format Rupiah"""
     return f"Rp {value:,.0f}"
 
+def parse_date_column(date_str):
+    """Parse kolom tanggal dari dataset dengan format 'DD MM YYYY'"""
+    try:
+        parts = date_str.split()
+        if len(parts) == 3:
+            day, month, year = parts
+            return f"{int(day):02d}-{int(month):02d}-{year}"
+        return date_str
+    except:
+        return date_str
+
 # ===================================================================
 # SIDEBAR - INFORMASI MODEL & UPLOAD DATASET
 # ===================================================================
@@ -328,6 +339,169 @@ with tab1:
                 - Model: LSTM 3-Layer
                 - Harga Prediksi: {format_currency(predicted_price)}
                 """)
+                
+                # ===================================================================
+                # GRAFIK FORECASTING - BAGIAN BARU
+                # ===================================================================
+                
+                st.markdown("---")
+                st.subheader("📈 Grafik Forecasting")
+                
+                # Ambil data forecasting
+                forecast_cols = forecast_df.columns.tolist()
+                forecast_values = forecast_df.loc[selected_commodity, forecast_cols].values
+                
+                # Cek apakah dataset historis tersedia
+                if 'dataset' in st.session_state:
+                    df_hist = st.session_state['dataset']
+                    
+                    # Filter data untuk komoditas terpilih
+                    # Kolom kedua adalah 'Komoditas (Rp)'
+                    commodity_col = df_hist.columns[1]
+                    commodity_data = df_hist[df_hist[commodity_col] == selected_commodity]
+                    
+                    if not commodity_data.empty:
+                        # Ambil kolom periode (skip No dan Komoditas)
+                        period_cols = df_hist.columns[2:].tolist()
+                        
+                        # Data historis
+                        hist_values = commodity_data.iloc[0, 2:].values
+                        
+                        # Buat figure
+                        fig = go.Figure()
+                        
+                        # Line historis (2020-2025)
+                        fig.add_trace(go.Scatter(
+                            x=period_cols,
+                            y=hist_values,
+                            mode='lines',
+                            name='Data Historis (2020-2025)',
+                            line=dict(color='#1f77b4', width=2),
+                            hovertemplate='<b>Periode:</b> %{x}<br><b>Harga:</b> Rp %{y:,.0f}<extra></extra>'
+                        ))
+                        
+                        # Line forecasting (Nov 2025 - Des 2026)
+                        fig.add_trace(go.Scatter(
+                            x=forecast_cols,
+                            y=forecast_values,
+                            mode='lines',
+                            name='Forecasting (Nov 2025 - Des 2026)',
+                            line=dict(color='#ff7f0e', width=2, dash='dash'),
+                            hovertemplate='<b>Periode:</b> %{x}<br><b>Harga:</b> Rp %{y:,.0f}<extra></extra>'
+                        ))
+                        
+                        # Highlight titik prediksi yang dipilih
+                        fig.add_trace(go.Scatter(
+                            x=[col_name],
+                            y=[predicted_price],
+                            mode='markers',
+                            name='Prediksi Dipilih',
+                            marker=dict(size=15, color='red', symbol='star', line=dict(width=2, color='darkred')),
+                            hovertemplate=f'<b>Prediksi: {month_labels[months.index(selected_month)]} {selected_year}</b><br><b>Harga:</b> Rp {predicted_price:,.0f}<extra></extra>'
+                        ))
+                        
+                        fig.update_layout(
+                            title=f'Tren Harga {selected_commodity} (2020-2026)',
+                            xaxis_title='Periode',
+                            yaxis_title='Harga (Rp)',
+                            height=550,
+                            hovermode='x unified',
+                            xaxis=dict(
+                                tickangle=-45,
+                                nticks=20
+                            ),
+                            legend=dict(
+                                orientation="h",
+                                yanchor="bottom",
+                                y=1.02,
+                                xanchor="right",
+                                x=1
+                            ),
+                            plot_bgcolor='rgba(250,250,250,0.9)',
+                            xaxis_showgrid=True,
+                            yaxis_showgrid=True
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # Info tambahan
+                        st.success("✅ Grafik menampilkan tren harga historis (2020-2025) dan hasil forecasting (Nov 2025 - Des 2026)")
+                        
+                    else:
+                        # Jika komoditas tidak ditemukan di dataset historis
+                        st.warning("⚠️ Data historis untuk komoditas ini tidak ditemukan di dataset yang diupload.")
+                        
+                        # Tampilkan grafik forecasting saja
+                        fig = go.Figure()
+                        
+                        fig.add_trace(go.Scatter(
+                            x=forecast_cols,
+                            y=forecast_values,
+                            mode='lines+markers',
+                            name='Forecasting',
+                            line=dict(color='#ff7f0e', width=2),
+                            marker=dict(size=6),
+                            hovertemplate='<b>Periode:</b> %{x}<br><b>Harga:</b> Rp %{y:,.0f}<extra></extra>'
+                        ))
+                        
+                        # Highlight titik prediksi yang dipilih
+                        fig.add_trace(go.Scatter(
+                            x=[col_name],
+                            y=[predicted_price],
+                            mode='markers',
+                            name='Prediksi Dipilih',
+                            marker=dict(size=15, color='red', symbol='star'),
+                            hovertemplate=f'<b>Prediksi: {month_labels[months.index(selected_month)]} {selected_year}</b><br><b>Harga:</b> Rp {predicted_price:,.0f}<extra></extra>'
+                        ))
+                        
+                        fig.update_layout(
+                            title=f'Forecasting Harga {selected_commodity} (Nov 2025 - Des 2026)',
+                            xaxis_title='Periode',
+                            yaxis_title='Harga (Rp)',
+                            height=500,
+                            hovermode='x unified',
+                            xaxis_tickangle=-45
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
+                else:
+                    # Jika dataset belum diupload
+                    st.info("ℹ️ Upload dataset di sidebar untuk melihat grafik dengan data historis lengkap (2020-2025).")
+                    
+                    # Tampilkan grafik forecasting saja
+                    fig = go.Figure()
+                    
+                    fig.add_trace(go.Scatter(
+                        x=forecast_cols,
+                        y=forecast_values,
+                        mode='lines+markers',
+                        name='Forecasting',
+                        line=dict(color='#ff7f0e', width=2),
+                        marker=dict(size=6),
+                        hovertemplate='<b>Periode:</b> %{x}<br><b>Harga:</b> Rp %{y:,.0f}<extra></extra>'
+                    ))
+                    
+                    # Highlight titik prediksi yang dipilih
+                    fig.add_trace(go.Scatter(
+                        x=[col_name],
+                        y=[predicted_price],
+                        mode='markers',
+                        name='Prediksi Dipilih',
+                        marker=dict(size=15, color='red', symbol='star', line=dict(width=2, color='darkred')),
+                        hovertemplate=f'<b>Prediksi: {month_labels[months.index(selected_month)]} {selected_year}</b><br><b>Harga:</b> Rp {predicted_price:,.0f}<extra></extra>'
+                    ))
+                    
+                    fig.update_layout(
+                        title=f'Forecasting Harga {selected_commodity} (Nov 2025 - Des 2026)',
+                        xaxis_title='Periode',
+                        yaxis_title='Harga (Rp)',
+                        height=500,
+                        hovermode='x unified',
+                        xaxis_tickangle=-45,
+                        plot_bgcolor='rgba(250,250,250,0.9)'
+                    )
+                    
+                    st.plotly_chart(fig, use_container_width=True)
                 
             except Exception as e:
                 st.error(f"Error: {str(e)}")
