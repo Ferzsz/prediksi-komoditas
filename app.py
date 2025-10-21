@@ -345,7 +345,7 @@ with tab1:
                 # ===================================================================
                 
                 st.markdown("---")
-                st.subheader("📈 Grafik Forecasting")
+                st.subheader("Grafik Forecasting")
                 
                 # Ambil data forecasting
                 forecast_cols = forecast_df.columns.tolist()
